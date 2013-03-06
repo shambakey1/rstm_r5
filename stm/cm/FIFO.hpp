@@ -1,0 +1,147 @@
+#ifndef __FIFO_H__
+#define __FIFO_H__
+
+#ifdef _MSC_VER
+#include <time.h>
+#include <winsock.h>
+#else
+//#include <sys/time.h>
+#endif
+
+#include "ContentionManager.hpp"
+#include <time.h>
+/********************************** SH-START ***************************************/
+#include <iostream>
+using namespace std;
+/********************************** SH-END ***************************************/
+
+namespace stm
+{
+  /**
+   *  FIFO compares transactions based on their TIMESTAMP, so the earlier one wins.
+   *  It acts like TIMESTAMP CM, but without other criteria used in the implemented TIMESTAMP (i. e., defunct and retry times)
+   */
+  class FIFO: public ContentionManager
+  {
+    private:
+/*
+      enum Backoff { INTERVAL = 1000, MAX_TRIES = 8 };
+      time_t stamp;
+      int tries;
+      int max_tries;
+      bool defunct;
+      void onOpen(void)
+      {
+          defunct = false;
+          tries = 0;
+          max_tries = MAX_TRIES;
+      }
+*/
+        struct timespec stamp;
+      ConflictResolutions shouldAbort(ContentionManager* enemy);
+
+    public:
+        
+      FIFO() /*: tries(0), max_tries(MAX_TRIES), defunct(false)*/ {
+      }
+      
+      timespec* GetTimestamp() { return &time_param; }
+/*
+      void SetDefunct() { defunct = true; }
+      bool GetDefunct() { return defunct; }
+
+      virtual void onContention()
+      {
+          defunct = false;
+          nano_sleep(INTERVAL);
+          tries++;
+      }
+
+      virtual void onOpenRead() { onOpen(); }
+      virtual void onOpenWrite() { onOpen(); }
+      virtual void onTransactionCommitted() { defunct = false; }
+      virtual void onTryCommitTransaction() { defunct = false; }
+      virtual void onTransactionAborted() { defunct = false; }
+      virtual void onBeginTransaction();
+*/
+
+      virtual ConflictResolutions onRAW(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+      virtual ConflictResolutions onWAR(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+      virtual ConflictResolutions onWAW(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+  };
+}; // namespace stm
+
+inline stm::ConflictResolutions
+stm::FIFO::shouldAbort(ContentionManager* enemy)
+{
+    FIFO* t=static_cast<FIFO*>(enemy);
+    struct timespec* other_stamp=t->GetTimestamp();
+    if(stamp.tv_sec < other_stamp->tv_sec)
+	return AbortOther;
+
+    else if (stamp.tv_sec == other_stamp->tv_sec && stamp.tv_nsec <= other_stamp->tv_nsec)
+	return AbortOther;
+
+/*
+    Timestamp* t = static_cast<Timestamp*>(enemy);
+    defunct = false;
+
+    if (!t)
+        return AbortOther;
+
+    // always abort younger transactions
+    if (t->GetTimestamp() <= stamp)
+        return AbortOther;
+
+    // if it's been a while, mark the enemy defunct
+    if (tries == (max_tries/2)) {
+        t->SetDefunct();
+    }
+    // at some point, finally give up and abort the enemy
+    else if (tries == max_tries) {
+        return AbortOther;
+    }
+    // if the enemy was marked defunct and isn't anymore, then we reset a bit
+    else if ((tries > (max_tries/2)) && (t->GetDefunct() == false)) {
+        tries = 2;
+        max_tries *= 2;
+    }
+*/
+    return AbortSelf;
+}
+/*
+inline void stm::FIFO::onBeginTransaction()
+{
+  try{
+        clock_gettime(CLOCK_REALTIME, &stamp);
+
+        //cout<<"stamp:"<<stamp.tv_sec<<" sec, "<<stamp.tv_nsec<<" nsec"<<endl;
+
+    }catch(exception e){
+        cout<<"FIFO:onBeginTransaction exception: "<<e.what()<<endl;
+    }
+}
+*/
+/*
+inline void stm::FIFO::onBeginTransaction()
+{
+    struct timeval stamp;
+    try{
+        //clock_gettime(CLOCK_REALTIME, &stamp);
+	gettimeofday(&stamp, NULL);
+    }catch(exception e){
+        cout<<"FIFO:onBeginTransaction exception: "<<e.what()<<endl;
+    }
+
+}
+*/
+#endif // __TIMESTAMP_H__

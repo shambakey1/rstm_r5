@@ -1,0 +1,10 @@
+make[1]: Entering directory `/usr/local/rstm_r5/stm'
+g++ rstm.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/rstm.o
+g++ cm/ContentionManager.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/ContentionManager.o
+g++ support/GCHeap.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/GCHeap.o
+make[1]: Leaving directory `/usr/local/rstm_r5/stm'
+make[1]: Entering directory `/usr/local/rstm_r5/stm'
+g++ rstm.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/rstm.o
+g++ cm/ContentionManager.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/ContentionManager.o
+g++ support/GCHeap.cpp -Wall -D_REENTRANT -fno-strict-aliasing -msse2 -mfpmath=sse -m32 -O3 -ggdb -I../ -c -o obj/GCHeap.o
+make[1]: Leaving directory `/usr/local/rstm_r5/stm'

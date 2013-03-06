@@ -1,0 +1,335 @@
+// THE WHOLE FILE NEEDS TO BE WRITTEN BECAUSE IT CURRENTLY ACTS LIKE RCM
+// SO THIS CODE IS NOT THE ACTUAL IMPLEMENTATION OF LCM, IT IS ONLY A PLACEHOLDER SO
+// RSTM CAN BE COMBILED WITHOUT BUGS
+#ifndef __LCM_H__
+#define __LCM_H__
+
+#ifdef _MSC_VER
+#include <time.h>
+#include <winsock.h>
+#else
+#include <sys/time.h>
+#endif
+
+#ifndef in_rstm
+#define in_rstm
+#endif
+
+#include "ContentionManager.hpp"
+#include <time.h>
+#include <chronos/chronos.h>
+#include <chronos/chronos_utils.h>
+#include <stm_chronos>
+#include <cmath>
+#include <vector>
+#include <pthread.h>
+
+using namespace std;
+
+
+namespace stm
+{
+
+  /**
+   *  Follow the paper to know how PNF works
+   */
+
+vector<double> m_set_objs;		//Holds accessed objects by executing transactions
+vector<ContentionManager*> n_set;	//Holds non executing transactions
+chronos_mutex_t m_set_mutx;		//Mutex to check m_set for conflicting objects. Removal from m_set does not need mutex
+chronos_mutex_init(&m_set_mutx);
+enum tx_state {released,retrying,checking,executing};	//Different states for transaction
+
+
+  class PNF: public ContentionManager
+  {
+    private:
+/*
+      void onOpen(void)
+      {
+          defunct = false;
+          tries = 0;
+          max_tries = MAX_TRIES;
+      }
+*/
+        //struct timespec stamp;
+        struct timespec now;
+	
+
+        ConflictResolutions shouldAbort(ContentionManager* enemy);
+
+    public:
+
+	pthread_t* th;				//ptr to current thread
+	vector<double> acc_obj;			//list of accessed objects by current tx
+	string cm_name;				//name of CM
+	bool m_set;				//if "true", tx is an executing tx. Otherwise, tx is a retrying one.
+	tx_state cur_state;			//Holds state of current transaction
+
+    PNF():m_set(false),cur_state(released)
+	{}
+      timespec* GetTimestamp() { return &stamp; }
+
+	void setAccObj(vector<double> in_acc_obj){
+	//Set list of accessed objects by current transaction
+		acc_obj=in_acc_obj;
+	}
+
+	vector<double> getAccObj(){
+	//get list of accessed objects by current transaction
+		return acc_obj;
+	}
+
+	void setCurThr(pthread_t* in_th){
+	//set pointer to thread inititing current transaction
+		th=in_th;
+	}
+
+	pthrea_t* getCurThr(){
+	//get pointer to thread initiating current transaction
+		return th;
+	}
+
+	void setCMName(string in_cm_name){
+	//set CM name to be used for further check
+		cm_name=in_cm_name;
+	}
+
+	string getCMName(){
+	//get CM name
+		return cm_name;
+	}
+
+	void setMset(bool in_m_set){
+	//if "true", then current transaction becomes executing one. Otherwise, transaction is in n_set
+		m_set=in_m_set;
+	}
+
+	bool getMset(){
+	//get status of current transaction (i. e., executing or not)
+		return m_set;
+	}
+
+	int nSetPos(ContentionManager* cm_ptr){
+	//Returns position of cm_ptr within n_set
+		int n_set_size=n_set.size();
+		for(int i=0;i<n_set_size;i++){
+			if(cm_ptr==n_set[i]){
+				//Found required position
+				return i;
+			}
+		}
+		//cm_ptr does not exist in n_set
+		return -1;
+	}
+
+	bool checkMset(int tx_pos){
+	//pos=> position of requesting Tx if it is in n_set. -1 otherwise.
+	//Initially called when transaction begins. Afterwards, called by checking transactions
+	//Check if requesting transaction conflicts with current executing transactions
+	//Hold mutex first. Otherwise, two conflicting transactions might add the same objects at the same check time.
+	//"true" if Tx added to m_set. "false" otherwise.
+		chronos_mutex_lock(&m_set_mutx);
+		unsigned int acc_obj_size=acc_obj.size();
+		unsigned int m_set_objs_size=m_set_objs.size();
+		//Traverse through m_set_objs for conflicting objects
+		for(int i=0;i<m_set_objs_size;i++){
+			for(int j=0;j<acc_obj_size;j++){
+				if(acc_obj[j]==m_set_objs[i]){
+					//conflict found. Add Tx to n_set if it is not already in n_set
+					if(cur_state!=checking){
+						addTxNset(this);
+						m_set=false;
+					}
+					cur_state=retrying;
+					//unlock m_set
+					chronos_mutex_unlock(&m_set_mutx);
+					return false;
+				}
+			}
+		}
+		//No conflict found. Add accessed objects to m_set
+		for(int i=0;i<acc_obj_size;i++){
+			m_set_objs.push_back(acc_objs[i]);
+		}
+		//if Tx was is in n_set, remove it from there.
+		if(cur_state==checking){
+			n_set.erase(n_set.begin()+tx_pos);
+		}
+		m_set=true;
+		cur_state=executing;
+		chronos_mutex_unlock(&m_set_mutx);
+		return true;
+	}
+
+	void addTxNset(ContentionManager* cm_th){
+	//Add cm_th to n_set according to its priority
+	//No mutex used here because it is called with m_set access (either add or remove)
+		int n_set_size=n_set.size();
+		for(int i=0;i<n_set_size;i++){
+			if(compTimeSpec(cm_th->getTimeParam(),n_set[i]->getTimeParam())){
+				n_set.insert(n_set.begin()+i,cm_th);
+			}
+		}	
+	}
+
+	bool compTimeSpec(struct timespec* f_ts,struct timespec* s_ts){
+	//"true" if f_ts timespec is smaller than s_ts. "false" otherwise
+		if((f_ts->tv_sec < s_ts->tv_sec) || ((f_ts->tv_sec == s_ts->tv_sec)&&(f_ts->tv_nsec < s_ts->tv_nsec))){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	virtual void onBeginTransaction() {
+	  try{
+		clock_gettime(CLOCK_REALTIME, &stamp);
+		if(cur_state==released){
+			//Tx newely released
+			pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+			if(!checkMset(-1)){	//-1 is a dummy variable
+				//Tx added to n_set. Reduce priority to lowest value
+				//If Tx becomes executing tx, then leave its priority at PNF_M_PRIO
+				pthread_setschedprio(*th, PNF_N_PRIO);
+			}
+		}
+		else if(cur_state==checking){
+			//Tx is in n_set. But an executing tx finished. So, Tx is checking m_set again
+			pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+			int next_tx=nSetPos(this)+1;		//Identify what is next Tx. Should be checked before
+								//further use. Otherwise, it might exceed n_set size
+								//This step should be done before "checkMset". Otherwise, 
+								//Tx might be removed from n_set before knowing its previous position
+			bool check_mset=checkMset(next_tx-1);	//Store checking result
+			if(next_tx<n_set.size()){		//Haven't finished n_set yet
+			//Prepare the next Tx in n_set for checking
+				n_set[next_tx]->cur_state=checking;
+				pthread_setschedprio(*(n_set[next_tx]->th), RUN_PRIO);
+			}
+			if(!checkMset()){			//Tx still conflicts with m_set
+				//Keep Tx as it is in n_set
+				pthread_setschedprio(*th, PNF_N_PRIO);
+			}
+		}
+		else{
+			//DO NOTHING. Tx is either executing or retrying
+		}
+		/********************************* Debug 5 start ********************************/
+		//tra_start.push_back(stamp);
+		/********************************* Debug 5 end ********************************/
+	    }catch(exception e){
+		cout<<"onBeginTransaction exception: "<<e.what()<<endl;
+	    }
+	}
+
+	virtual void onTransactionCommitted() {
+		try{
+		//Remove accessed objects from m_set
+			chronos_mutex_lock(&m_set_mutx);
+			int acc_obj_size=acc_obj.size();
+			int m_set_objs_size=m_set_objs.size();
+			for(int j=0;j<acc_obj_size;j++){
+				for(int i=0;i<m_set_objs_size;i++){
+					if(acc_obj[j]==m_set_objs[i]){
+						m_set_obj.erase(m_set_objs.begin()+i);
+						m_set_objs_size--;
+						break;
+					}
+				}
+			}
+		//Change state of highest priority transaction to "checking", and increase its priority to "RUN_PRIO"
+		//So, if processors available, n_set[0] can check itself against m_set.
+		//Sequentially, following transactions in n_set can check conflict with m_set in their order in n_set
+			n_set[0]->cur_state=checking;
+		//Increasing priority to "RUN_PRIO" is important. If n_set[0] has a lower priority than other executing tasks
+		//then no processor is available to n_set[0]. Otherwise, n_set[0] can preempt the lowest priority thread
+		//(lower than Tx itself) if all processors are occupied
+			pthread_setschedprio(*(n_set[0]->th), RUN_PRIO);
+			chronos_mutex_unlock(&m_set_mutx);
+		}catch(exception e){
+			cout<<"onTransactionCommitted exception: "<<e.what()<<endl;
+		}
+	}
+
+      virtual void onTransactionAborted() {
+	  try{
+		clock_gettime(CLOCK_REALTIME, &tra_abort);
+		total_abort_duration+=subtract_ts_mod(&stamp,&tra_abort);
+		/*************************** Debug 6 start ********************************/
+		//tra_abr.push_back(tra_abort);
+		//tra_int.push_back(subtract_ts_mod(&stamp,&tra_abort));
+		/*************************** Debug 6 end ********************************/
+	    }catch(exception e){
+		cout<<"onTransactionAborted exception: "<<e.what()<<endl;
+	    }
+
+      }
+
+
+
+/*
+      time_t GetTimestamp() { return stamp; }
+      void SetDefunct() { defunct = true; }
+      bool GetDefunct() { return defunct; }
+
+      virtual void onContention()
+      {
+          defunct = false;
+          nano_sleep(INTERVAL);
+          tries++;
+      }
+
+      virtual void onOpenRead() { onOpen(); }
+      virtual void onOpenWrite() { onOpen(); }
+      virtual void onTransactionCommitted() { defunct = false; }
+      virtual void onTryCommitTransaction() { defunct = false; }
+      virtual void onTransactionAborted() { defunct = false; }
+      virtual void onBeginTransaction();
+
+ */
+      
+      virtual ConflictResolutions onRAW(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+      virtual ConflictResolutions onWAR(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+      virtual ConflictResolutions onWAW(ContentionManager* e)
+      {
+          return shouldAbort(e);
+      }
+  };
+}; // namespace stm
+
+inline stm::ConflictResolutions
+stm::PNF::shouldAbort(ContentionManager* enemy)
+{
+	PNF* t=static_cast<PNF*>(enemy);
+	//If current task is in m_set, abort other
+	if(m_set==true){
+		return AbortOther;
+	}
+	else{
+		return AbortSelf;
+	}	
+}
+
+/*
+inline void stm::LCM::onBeginTransaction()
+{
+  try{
+        clock_gettime(CLOCK_REALTIME, &stamp);
+
+        //cout<<"stamp:"<<stamp.tv_sec<<" sec, "<<stamp.tv_nsec<<" nsec"<<endl;
+
+    }catch(exception e){
+        cout<<"LCM:onBeginTransaction exception: "<<e.what()<<endl;
+    }
+}
+*/
+
+#endif // __LCM_H__

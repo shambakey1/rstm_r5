@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="80">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df name="rstm_r5" root=".">
+      <df name="alt-license">
+        <in>TypeManip.h</in>
+        <in>TypeTraits.h</in>
+        <in>XGetopt.cpp</in>
+        <in>XGetopt.h</in>
+        <in>rand_r.h</in>
+        <in>static_check.h</in>
+      </df>
+      <df name="bench">
+        <df name="obj">
+          <df name="rstm">
+          </df>
+        </df>
+        <in>BenchMain.cpp</in>
+        <in>Benchmark.cpp</in>
+        <in>Benchmark.hpp</in>
+        <in>CGHash.cpp</in>
+        <in>CGHash.hpp</in>
+        <in>Counter.hpp</in>
+        <in>Counter_new.hpp</in>
+        <in>DList.cpp</in>
+        <in>DList.hpp</in>
+        <in>FGL.cpp</in>
+        <in>FGL.hpp</in>
+        <in>Forest.hpp</in>
+        <in>Hash.hpp</in>
+        <in>IntSet.hpp</in>
+        <in>LFUCache.cpp</in>
+        <in>LFUCache.hpp</in>
+        <in>LinkedList.cpp</in>
+        <in>LinkedList.hpp</in>
+        <in>LinkedListRelease.cpp</in>
+        <in>LinkedListRelease.hpp</in>
+        <in>ListOverwriter.hpp</in>
+        <in>PrivList.hpp</in>
+        <in>PrivTree.cpp</in>
+        <in>PrivTree.hpp</in>
+        <in>RBTree.cpp</in>
+        <in>RBTree.hpp</in>
+        <in>RBTreeLarge.cpp</in>
+        <in>RBTreeLarge.hpp</in>
+        <in>RWPathology.hpp</in>
+        <in>RandomGraphList.cpp</in>
+        <in>RandomGraphList.hpp</in>
+        <in>Stack.hpp</in>
+        <in>StridePathology.hpp</in>
+        <in>TypeTest.hpp</in>
+        <in>VerifyNesting.hpp</in>
+        <in>VerifyRetry.hpp</in>
+        <in>WWPathology.hpp</in>
+      </df>
+      <df name="hashing">
+        <in>ExtHashTest.cpp</in>
+        <in>ExtensibleHash.hpp</in>
+      </df>
+      <df name="libstamp">
+        <in>rstm.cpp</in>
+        <in>rstm.h</in>
+        <in>stm.h</in>
+      </df>
+      <df name="mesh">
+        <in>barrier.hpp</in>
+        <in>config.hpp</in>
+        <in>dwyer.cpp</in>
+        <in>dwyer.hpp</in>
+        <in>edge.cpp</in>
+        <in>edge.hpp</in>
+        <in>edge_set.cpp</in>
+        <in>edge_set.hpp</in>
+        <in>lock.hpp</in>
+        <in>macros.hpp</in>
+        <in>mesh.cpp</in>
+        <in>my_thread.cpp</in>
+        <in>my_thread.hpp</in>
+        <in>point.cpp</in>
+        <in>point.hpp</in>
+        <in>queues.cpp</in>
+        <in>queues.hpp</in>
+        <in>side.cpp</in>
+        <in>side.hpp</in>
+        <in>tm_hash_set.hpp</in>
+        <in>tm_list_set.hpp</in>
+        <in>tm_set.hpp</in>
+        <in>worker.cpp</in>
+        <in>worker.hpp</in>
+      </df>
+      <df name="stm">
+        <df name="api">
+          <in>cgl_api.hpp</in>
+          <in>redo_lock_api.hpp</in>
+          <in>rstm_api.hpp</in>
+          <in>wordbased_api.hpp</in>
+        </df>
+        <df name="cm">
+          <in>Aggressive.hpp</in>
+          <in>AggressiveR.hpp</in>
+          <in>CMPolicies.hpp</in>
+          <in>ContentionManager.cpp</in>
+          <in>ContentionManager.hpp</in>
+          <in>ECM.hpp</in>
+          <in>Eruption.hpp</in>
+          <in>FBLT.hpp</in>
+          <in>FIFO.hpp</in>
+          <in>Gladiator.hpp</in>
+          <in>Greedy.hpp</in>
+          <in>Highlander.hpp</in>
+          <in>Justice.hpp</in>
+          <in>Karma.hpp</in>
+          <in>Killblocked.hpp</in>
+          <in>LCM.hpp</in>
+          <in>PNF.hpp</in>
+          <in>PNF_old.hpp</in>
+          <in>PNF_old_1.hpp</in>
+          <in>Polite.hpp</in>
+          <in>PoliteR.hpp</in>
+          <in>Polka.hpp</in>
+          <in>Polkaruption.hpp</in>
+          <in>Polkavis.hpp</in>
+          <in>RCM.hpp</in>
+          <in>Reincarnate.hpp</in>
+          <in>Serializer.hpp</in>
+          <in>Timestamp.hpp</in>
+          <in>Timid.hpp</in>
+          <in>TimidR.hpp</in>
+          <in>Whpolka.hpp</in>
+          <in>WordBased.hpp</in>
+          <in>faircm.hpp</in>
+        </df>
+        <df name="obj">
+        </df>
+        <df name="support">
+          <in>Bloom.hpp</in>
+          <in>ConflictDetector.hpp</in>
+          <in>DescriptorPolicy.hpp</in>
+          <in>GCHeap.cpp</in>
+          <in>Inevitability.hpp</in>
+          <in>MMPolicy.hpp</in>
+          <in>MiniVector.hpp</in>
+          <in>Privatization.hpp</in>
+          <in>Retry.hpp</in>
+          <in>StlAllocator.hpp</in>
+          <in>ThreadLocalPointer.hpp</in>
+          <in>TokenManager.hpp</in>
+          <in>WBMMPolicy.hpp</in>
+          <in>atomic_ops.h</in>
+          <in>defs.hpp</in>
+          <in>hrtime.h</in>
+          <in>word_based_descriptor.hpp</in>
+          <in>word_based_metadata.hpp</in>
+          <in>word_based_writeset.hpp</in>
+        </df>
+        <in>cgl.cpp</in>
+        <in>cgl.hpp</in>
+        <in>et.cpp</in>
+        <in>et.hpp</in>
+        <in>fair.cpp</in>
+        <in>fair.hpp</in>
+        <in>flow.cpp</in>
+        <in>flow.hpp</in>
+        <in>llt.cpp</in>
+        <in>llt.hpp</in>
+        <in>precise.cpp</in>
+        <in>precise.hpp</in>
+        <in>redo_lock.cpp</in>
+        <in>redo_lock.hpp</in>
+        <in>ringsw.cpp</in>
+        <in>ringsw.hpp</in>
+        <in>rstm.cpp</in>
+        <in>rstm.hpp</in>
+        <in>sgla.cpp</in>
+        <in>sgla.hpp</in>
+        <in>stm.hpp</in>
+        <in>strict.cpp</in>
+        <in>strict.hpp</in>
+        <in>tml.cpp</in>
+        <in>tml.hpp</in>
+        <in>tml_lazy.cpp</in>
+        <in>tml_lazy.hpp</in>
+      </df>
+      <df name="swarm">
+        <in>Animation.cpp</in>
+        <in>Animation.hpp</in>
+        <in>Collide.cpp</in>
+        <in>Collide.hpp</in>
+        <in>Game.cpp</in>
+        <in>Game.hpp</in>
+        <in>GameObject.cpp</in>
+        <in>GameObject.hpp</in>
+        <in>GameObjectController.cpp</in>
+        <in>GameObjectController.hpp</in>
+        <in>GameState.cpp</in>
+        <in>GameState.hpp</in>
+        <in>Material.cpp</in>
+        <in>Material.hpp</in>
+        <in>MatrixMath.hpp</in>
+        <in>ObjectBound.cpp</in>
+        <in>ObjectBound.hpp</in>
+        <in>PhysicsProperty.cpp</in>
+        <in>PhysicsProperty.hpp</in>
+        <in>Profiler.cpp</in>
+        <in>Profiler.hpp</in>
+        <in>RenderThread.cpp</in>
+        <in>RenderThread.hpp</in>
+        <in>Renderer.cpp</in>
+        <in>Renderer.hpp</in>
+        <in>STMList.cpp</in>
+        <in>STMList.hpp</in>
+        <in>Spatial.cpp</in>
+        <in>Spatial.hpp</in>
+        <in>UpdateThread.cpp</in>
+        <in>UpdateThread.hpp</in>
+        <in>World.cpp</in>
+        <in>World.hpp</in>
+        <in>my_thread.cpp</in>
+        <in>my_thread.hpp</in>
+      </df>
+      <df name="VisualStudio">
+        <df name="bench">
+        </df>
+        <df name="libcgl">
+        </df>
+        <df name="libet">
+        </df>
+        <df name="libfair">
+        </df>
+        <df name="libflow">
+        </df>
+        <df name="libllt">
+        </df>
+        <df name="libprecise">
+        </df>
+        <df name="libredo_lock">
+        </df>
+        <df name="libringsw">
+        </df>
+        <df name="librstm">
+        </df>
+        <df name="libsgla">
+        </df>
+        <df name="libstrict">
+        </df>
+        <df name="libtml">
+        </df>
+        <df name="libtml_lazy">
+        </df>
+        <df name="readme">
+        </df>
+        <df name="stmconfig">
+        </df>
+        <df name="swarm">
+        </df>
+      </df>
+      <in>config.h</in>
+      <in>stmconfig.cpp</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>stm/cm</pElem>
+              <pElem>stm/support</pElem>
+              <pElem>../../include/c++/4.4</pElem>
+              <pElem>../../include/c++/4.4/debug</pElem>
+              <pElem>stm</pElem>
+              <pElem>../../lib/gcc/i486-linux-gnu/4.4.1/include</pElem>
+              <pElem>../../include/c++/4.4/i486-linux-gnu/bits</pElem>
+              <pElem>../../include/c++/4.4/bits</pElem>
+              <pElem>../../include/c++/4.4/ext</pElem>
+            </incDir>
+          </ccTool>
+        </makeTool>
+      </makefileType>
+      <item path="alt-license/TypeManip.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="alt-license/TypeTraits.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="alt-license/XGetopt.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="alt-license/XGetopt.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="alt-license/rand_r.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="config.h" ex="true" tool="3" flavor="0">
+      </item>
+      <folder path="rstm_r5/bench">
+        <ccTool>
+          <incDir>
+            <pElem>bench</pElem>
+            <pElem>alt-license</pElem>
+            <pElem>.</pElem>
+            <pElem>stm/api</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+      <item path="hashing/ExtHashTest.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="hashing/ExtensibleHash.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="libstamp/rstm.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="libstamp/rstm.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="libstamp/stm.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/barrier.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/config.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/dwyer.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/dwyer.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/edge.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/edge.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/edge_set.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/edge_set.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/lock.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/macros.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/mesh.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/my_thread.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/my_thread.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/point.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/point.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/queues.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/queues.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/side.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/side.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/tm_hash_set.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/tm_list_set.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/tm_set.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="mesh/worker.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="mesh/worker.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/api/cgl_api.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/api/redo_lock_api.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/api/wordbased_api.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/cgl.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/cgl.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/cm/PNF.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/cm/WordBased.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/cm/faircm.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/et.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/et.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/fair.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/fair.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/flow.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/flow.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/llt.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/llt.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/precise.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/precise.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/redo_lock.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/redo_lock.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/ringsw.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/ringsw.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/sgla.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/sgla.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/stm.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/strict.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/strict.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/support/Bloom.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/support/Privatization.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/support/StlAllocator.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/support/WBMMPolicy.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/support/word_based_descriptor.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="stm/support/word_based_writeset.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/tml.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/tml.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stm/tml_lazy.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="stm/tml_lazy.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="stmconfig.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Animation.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Animation.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Collide.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Collide.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Game.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Game.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/GameObject.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/GameObject.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/GameObjectController.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/GameObjectController.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/GameState.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/GameState.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Material.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Material.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/MatrixMath.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/ObjectBound.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/ObjectBound.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/PhysicsProperty.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/PhysicsProperty.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Profiler.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Profiler.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/RenderThread.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/RenderThread.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Renderer.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Renderer.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/STMList.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/STMList.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/Spatial.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/Spatial.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/UpdateThread.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/UpdateThread.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/World.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/World.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="swarm/my_thread.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="swarm/my_thread.hpp" ex="true" tool="3" flavor="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,0 +1,232 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (c) 2005, 2006, 2007, 2008, 2009
+// University of Rochester
+// Department of Computer Science
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//    * Redistributions of source code must retain the above copyright notice,
+//      this list of conditions and the following disclaimer.
+//
+//    * Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//
+//    * Neither the name of the University of Rochester nor the names of its
+//      contributors may be used to endorse or promote products derived from
+//      this software without specific prior written permission.
+//
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+
+#ifndef __CONTENTIONMANAGER_H__
+#define __CONTENTIONMANAGER_H__
+
+#include <string>
+#include "../support/atomic_ops.h"
+#include "../support/hrtime.h"
+/*********************************** SH-START ******************************************/
+#include <chronos/chronos.h>
+#include <chronos/chronos_utils.h>
+#include <iostream>
+#include <vector>
+#include <stm_chronos.hpp>
+#include <pthread.h>
+using namespace std;
+/*********************************** SH-END ******************************************/
+
+/******************************* Debug 10 start ***************************************/
+#include <vector>
+/******************************* Debug 10 end ***************************************/
+
+namespace stm
+{
+  enum ConflictResolutions { AbortSelf, AbortOther, Wait };
+
+  class ContentionManager
+  {
+    protected:
+      int priority;
+    public:
+      /********************************** SH-START *******************************/
+      struct timespec time_param;			//input parameter for ECM which should be cast to deadline
+                                        		//In case of RCM, it holds the period
+	unsigned long length;				//specific for LCM
+	double psy;					//specific for LCM
+	struct timespec stamp, tra_abort;		//stamp records the beginning of the transaction, while tra_abort records when the transaction is aborted
+	unsigned long long total_abort_duration;	//Holds the total abort time of all instances of the thread during the whole run time of experimennt
+	pthread_t* th;					//specific for PNF
+	vector<double> acc_obj;				//specific for PNF
+	string cm_name;					//specific for PNF
+	bool m_set=false;				//specific for PNF
+	/************************ Debug 1 start ****************************/
+	//vector<timespec> tra_start, tra_abr;	//Record transaction start, transaction abort.
+	//vector<unsigned long long> tra_int;	//Records difference between transaction start and transaction abort so we can calculate total time of abortion for transactions in each thread
+	/************************ Debug 1 end ****************************/
+      struct timespec* getTimeParam(){
+          return &time_param;
+      }
+
+	/******************** LCM functions start ********************/
+
+	void setLength(unsigned long in_length){
+		length=in_length;
+	}
+
+	unsigned long getLength(){
+		return length;
+	}
+
+	void setPsy(double in_psy){
+		psy=in_psy;
+	}
+
+	double getPsy(){
+		return psy;
+	}
+	/******************** LCM functions end ********************/
+
+	/******************** PNF functions start *******************/
+	void setAccObj(vector<double> in_acc_obj){
+	//Set list of accessed objects by current transaction
+		acc_obj=in_acc_obj;
+	}
+
+	vector<double> getAccObj(){
+	//get list of accessed objects by current transaction
+		return acc_obj;
+	}
+
+	void setCurThr(pthread_t* in_th){
+	//set pointer to thread inititing current transaction
+		th=in_th;
+	}
+
+	pthrea_t* getCurThr(){
+	//get pointer to thread initiating current transaction
+		return th;
+	}
+
+	void setCMName(string in_cm_name){
+	//set CM name to be used for further check
+		cm_name=in_cm_name;
+	}
+
+	string getCMName(){
+	//get CM name
+		return cm_name;
+	}
+
+	void setMset(bool in_m_set){
+	//if "true", then current transaction becomes executing one. Otherwise, transaction is in n_set
+		m_set=in_m_set;
+	}
+
+	bool getMset(){
+	//get status of current transaction (i. e., executing or not)
+		return m_set;
+	}
+	/******************** PNF functions end *******************/
+
+	unsigned long long subtract_ts_mod(struct timespec *first, struct timespec *last) {
+	//This function is includedin "stm_chronos" and named there "subtract_ts_mo". It is included here because "rstm" cannot include "stm_chronos.hpp"
+		signed long nsec;
+		unsigned long long int time;
+
+		nsec = last->tv_nsec - first->tv_nsec;
+		if(nsec < 0) {
+			time = BILLION + nsec;
+			time += ((unsigned long long)(last->tv_sec - first->tv_sec - 1))*BILLION;
+		} else {
+			time = nsec + ((unsigned long long)(last->tv_sec - first->tv_sec))*BILLION;
+		}
+
+		return time;
+	}
+
+      /********************************** SH-END *******************************/
+      ContentionManager() : priority(0),total_abort_duration(0){
+	/******************************* SH-START **********************************/
+	tra_abort.tv_sec=0;
+	tra_abort.tv_nsec=0;
+	/******************************* SH-END **********************************/
+      }
+      int getPriority() { return priority; }
+
+      ////////////////////////////////////////
+      // Transaction-level events
+      virtual void onBeginTransaction() {
+	  try{
+		clock_gettime(CLOCK_REALTIME, &stamp);
+		/********************************* Debug 5 start ********************************/
+		//tra_start.push_back(stamp);
+		/********************************* Debug 5 end ********************************/
+	    }catch(exception e){
+		cout<<"onBeginTransaction exception: "<<e.what()<<endl;
+	    }
+     }
+	virtual void onTryCommitTransaction() { }
+	virtual void onTransactionCommitted() {
+		priority = 0;	//This step is not part of PNF. It comes from original CM
+	}
+      virtual void onTransactionAborted() {
+	  try{
+		clock_gettime(CLOCK_REALTIME, &tra_abort);
+		total_abort_duration+=subtract_ts_mod(&stamp,&tra_abort);
+		/*************************** Debug 6 start ********************************/
+		//tra_abr.push_back(tra_abort);
+		//tra_int.push_back(subtract_ts_mod(&stamp,&tra_abort));
+		/*************************** Debug 6 end ********************************/
+	    }catch(exception e){
+		cout<<"onTransactionAborted exception: "<<e.what()<<endl;
+	    }
+
+      }
+
+      ////////////////////////////////////////
+      // Object-level events
+      virtual void onContention() { }
+      virtual void onOpenRead() { }
+      virtual void onOpenWrite() { }
+      virtual void onReOpen() { }
+
+      ////////////////////////////////////////
+      // Conflict Event methods
+      virtual ConflictResolutions onRAW(ContentionManager* enemy) = 0;
+      virtual ConflictResolutions onWAR(ContentionManager* enemy) = 0;
+      virtual ConflictResolutions onWAW(ContentionManager* enemy) = 0;
+
+      virtual ~ContentionManager() { }
+  };
+
+  // create a contention manager
+  ContentionManager* Factory(std::string cm_type);
+
+/************************* SH-START **********************************/
+	// Redefine factory to pass real-time arguments to the real-time CM
+  ContentionManager* Factory(std::string cm_type, void* t_args);
+/************************* SH-END **********************************/
+
+  // wait by executing a bunch of nops in a loop (not preemption
+  // tolerant)
+  inline void nano_sleep(unsigned long nops)
+  {
+      for (unsigned i = 0; i < nops; i++)
+          nop();
+  }
+} // namespace stm
+
+#endif  // __CONTENTIONMANAGER_H__

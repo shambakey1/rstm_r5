@@ -1,0 +1,102 @@
+./Justice.hpp:   * Justice is a Polka variant with different read, write, and try weights.
+./Justice.hpp:      unsigned long reads;
+./Justice.hpp:      Justice() : reads(0), writes(0) { }
+./Justice.hpp:              reads*READWEIGHT + writes*WRITEWEIGHT + tries*TRYWEIGHT;
+./Justice.hpp:      virtual void onOpenRead()   { reads++; tries = 0; }
+./Justice.hpp:          reads = 0;
+./PNF.hpp~:#include <pthread.h>
+./PNF.hpp~:	pthread_t* th;				//ptr to current thread
+./PNF.hpp~:	void setCurThr(pthread_t* in_th){
+./PNF.hpp~:	//set pointer to thread inititing current transaction
+./PNF.hpp~:	//get pointer to thread initiating current transaction
+./PNF.hpp~:					//conflict found. Add Tx to n_set if it is not already in n_set
+./PNF.hpp~:			pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+./PNF.hpp~:				pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF.hpp~:			pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+./PNF.hpp~:				pthread_setschedprio(*(n_set[next_tx]->th), RUN_PRIO);
+./PNF.hpp~:				pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF.hpp~:		//then no processor is available to n_set[0]. Otherwise, n_set[0] can preempt the lowest priority thread
+./PNF.hpp~:			pthread_setschedprio(*(n_set[0]->th), RUN_PRIO);
+./ContentionManager.hpp~:#include <pthread.h>
+./ContentionManager.hpp~:	unsigned long long total_abort_duration;	//Holds the total abort time of all instances of the thread during the whole run time of experimennt
+./ContentionManager.hpp~:	pthread_t* th;					//specific for PNF
+./ContentionManager.hpp~:	//vector<unsigned long long> tra_int;	//Records difference between transaction start and transaction abort so we can calculate total time of abortion for transactions in each thread
+./ContentionManager.hpp~:	void setCurThr(pthread_t* in_th){
+./ContentionManager.hpp~:	//set pointer to thread inititing current transaction
+./ContentionManager.hpp~:	//get pointer to thread initiating current transaction
+./faircm.hpp:              WBR; // write to epoch before reading inev_txn_count
+./faircm.hpp:       * reads, so we don't actually do anything here
+./faircm.hpp:      // class-wide stuff: list of high priority transactions' read sets, and
+./faircm.hpp:          // get a read filter and put it in the list, but don't bump
+./faircm.hpp:          // ok, we've got a prio read on this
+./faircm.hpp:       *  already be asleep.
+./faircm.hpp:   * A contention manager that uses visible readers to provide priority and
+./faircm.hpp:       * a reader record (rrec) holds bits representing up to 128 reader
+./faircm.hpp:          /*** num_bits bits, to represent num_bits readers */
+./faircm.hpp:      int                       myslot;    // 0-127 my vis reader bit
+./faircm.hpp:              // unset all my read bits
+./faircm.hpp:          // we failed.  oh well.  thread keeps old priority.
+./faircm.hpp:              // unset all my read bits
+./faircm.hpp:          // now mark all reads
+./faircm.hpp:          // unset all my read bits
+./faircm.hpp:          // \exist retriers.  accumulate read bits for my locks
+./faircm.hpp:          // \exist prio txns.  accumulate read bits covering addresses in my
+./faircm.hpp:              // unset all my read bits
+./CMPolicies.hpp~:	ContentionManager* dynamicCM=NULL;	//Initialized to NULL. This enables checking if PNF already exists or not
+./CMPolicies.hpp~:			//PNF CM already exists. Do not make a new one
+./CMPolicies.hpp~:			//PNF CM already exists. Do not make a new one
+./ContentionManager.hpp:#include <pthread.h>
+./ContentionManager.hpp:	unsigned long long total_abort_duration;	//Holds the total abort time of all instances of the thread during the whole run time of experimennt
+./ContentionManager.hpp:        int th;				//ptr to current thread
+./ContentionManager.hpp:	//vector<unsigned long long> tra_int;	//Records difference between transaction start and transaction abort so we can calculate total time of abortion for transactions in each thread
+./ContentionManager.hpp:            //Declares a new instance of the current thread
+./ContentionManager.hpp:	//set value to thread inititing current transaction
+./ContentionManager.hpp:	//get value of thread initiating current transaction
+./Whpolka.hpp:  /*** Whpolka makes writes heavier than reads, otherwise it's polka */
+./PNF.hpp:#include <pthread.h>
+./PNF.hpp://pthread_mutex_t m_set_mutx = PTHREAD_MUTEX_INITIALIZER; //Mutex to check m_set for conflicting objects. Removal from m_set does not need mutex
+./PNF.hpp:					//conflict found. Add Tx to n_set if it is not already in n_set
+./PNF.hpp:                    //pthread_mutex_lock(&m_set_mutx);
+./PNF.hpp:                    //pthread_mutex_unlock(&m_set_mutx);
+./PNF.hpp:                        //pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF.hpp:			//pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+./PNF.hpp:                        //pthread_mutex_lock(&m_set_mutx);
+./PNF.hpp:				//pthread_setschedprio(*(((PNF*)(n_set[next_tx]))->th), RUN_PRIO);
+./PNF.hpp:                        //pthread_mutex_unlock(&m_set_mutx);
+./PNF.hpp:				//pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF.hpp:                        //increase priority of current thread before locking
+./PNF.hpp:			//pthread_mutex_lock(&m_set_mutx);
+./PNF.hpp:			//then no processor is available to n_set[0]. Otherwise, n_set[0] can preempt the lowest priority thread
+./PNF.hpp:				//pthread_setschedprio(*(((PNF*)(n_set[(unsigned int) 0]))->th), RUN_PRIO);
+./PNF.hpp:                                //pthread_getschedparam((*th), &policy, &param);
+./PNF.hpp:                        //pthread_mutex_unlock(&m_set_mutx);
+./PNF.hpp:			//pthread_setschedprio(*th,RUN_PRIO);
+./WordBased.hpp:              // an impact on other threads
+./Polkavis.hpp:  // readers
+./Reincarnate.hpp:   *  new timestamp on abort.  So Greedy (when coupled with visible readers)
+./Reincarnate.hpp:   *  readers) is much closer to livelock freedom.  If the workload has a
+./Reincarnate.hpp:              // an impact on other threads
+./LCM.hpp:                        // passed is the percentage of already executed part of the interfered transaction
+./LCM.hpp:    //This function returns the percentage of the already executed lenght of the current transaction
+./LCM.hpp~:                        // passed is the percentage of already executed part of the interfered transaction
+./LCM.hpp~:    //This function returns the percentage of the already executed lenght of the current transaction
+./PoliteR.hpp:              // impact on other threads.  By using getElapsedTime, we
+./Polite.hpp:              // impact on other threads.  By using getElapsedTime, we
+./PNF_old.hpp:#include <pthread.h>
+./PNF_old.hpp://pthread_mutex_t m_set_mutx = PTHREAD_MUTEX_INITIALIZER; //Mutex to check m_set for conflicting objects. Removal from m_set does not need mutex
+./PNF_old.hpp:					//conflict found. Add Tx to n_set if it is not already in n_set
+./PNF_old.hpp:                    //pthread_mutex_lock(&m_set_mutx);
+./PNF_old.hpp:                    //pthread_mutex_unlock(&m_set_mutx);
+./PNF_old.hpp:                        //pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF_old.hpp:			//pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
+./PNF_old.hpp:                        //pthread_mutex_lock(&m_set_mutx);
+./PNF_old.hpp:				//pthread_setschedprio(*(((PNF*)(n_set[next_tx]))->th), RUN_PRIO);
+./PNF_old.hpp:                        //pthread_mutex_unlock(&m_set_mutx);
+./PNF_old.hpp:				//pthread_setschedprio(*th, PNF_N_PRIO);
+./PNF_old.hpp:                        //increase priority of current thread before locking
+./PNF_old.hpp:			//pthread_mutex_lock(&m_set_mutx);
+./PNF_old.hpp:			//then no processor is available to n_set[0]. Otherwise, n_set[0] can preempt the lowest priority thread
+./PNF_old.hpp:				//pthread_setschedprio(*(((PNF*)(n_set[(unsigned int) 0]))->th), RUN_PRIO);
+./PNF_old.hpp:                                //pthread_getschedparam((*th), &policy, &param);
+./PNF_old.hpp:                        //pthread_mutex_unlock(&m_set_mutx);
+./PNF_old.hpp:			//pthread_setschedprio(*th,RUN_PRIO);
