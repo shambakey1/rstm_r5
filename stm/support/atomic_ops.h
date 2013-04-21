@@ -578,9 +578,12 @@ static inline vector<unsigned long long> fas(volatile unsigned long* ptr, int am
   unsigned long expected;
   unsigned long long num_retries=-1;	//records number of failure retries to access the specified object
   	  	  	  	  	  	  	  	  	  //Initialized at -1 to exclude the one success access to the object
-  struct timespec st_time,end_time,tmp_time;
+  struct timespec st_time;
+  struct timespec end_time;
+  struct timespec tmp_time;
   unsigned long found = *ptr;
   clock_gettime(CLOCK_REALTIME, &st_time);
+  end_time=st_time;	//If object is acquired from first attempt, then end_time should be the same as the start time
   do {
 	  tmp_time=end_time;
 	  clock_gettime(CLOCK_REALTIME, &end_time);
