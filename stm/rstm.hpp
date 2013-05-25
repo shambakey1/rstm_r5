@@ -364,7 +364,7 @@ class Descriptor {
       tx_state = stm::ACTIVE;
 
 #if defined(STM_ROLLBACK_SETJMP)
-      setjmp_buf.insert(cp_sh(NULL,buf));
+   	  setjmp_buf.insert(cp_sh(NULL,buf));
 #endif
 
       // cm notification
@@ -409,7 +409,7 @@ class Descriptor {
       tx_state = stm::ACTIVE;
 
 #if defined(STM_ROLLBACK_SETJMP)
-      setjmp_buf.insert(cp_sh(NULL,buf));
+   	  setjmp_buf.insert(cp_sh(NULL,buf));
 #endif
 
       // cm notification
@@ -459,7 +459,7 @@ class Descriptor {
       tx_state = stm::ACTIVE;
 
 #if defined(STM_ROLLBACK_SETJMP)
-      setjmp_buf.insert(cp_sh(NULL,buf));
+   	  setjmp_buf.insert(cp_sh(NULL,buf));
 #endif
 
       // cm notification
@@ -612,9 +612,14 @@ class Descriptor {
   void cleanupCheckpoints(SharedHandle* sh);
 
   /**
-   * The same as cleanupCheckpoints(sh) except that it removes all checkpoints
+   * The same as cleanupCheckpoints(sh) except that it removes all checkpoints except the first one
    */
   void cleanupCheckpoints();
+
+  /**
+   * The same as cleanupCheckpoints(sh) except that it removes all checkpoints
+   */
+  void removeCheckpoints();
 
   /**
    * The same as cleanupVisReads() except it removes items from end of visiblereads
@@ -879,6 +884,17 @@ inline void Descriptor::cleanupInvisRead(SharedHandle* sh){
 	invisibleReads.resize(cur_size-num_rem_elm);
 }
 
+inline void Descriptor::removeCheckpoints(){
+	/*
+	 * Remove all checkpoints including the first one. Used when transaction commits
+	 */
+	setjmp_bufLog::iterator e=setjmp_buf.end();
+	for(setjmp_bufLog::iterator i=setjmp_buf.begin();i<e;i++){
+		setjmp_buf.remove(i);
+	}
+	setjmp_buf.reset();
+}
+
 inline void Descriptor::cleanupCheckpoints(SharedHandle* sh){
 	/*
 	 * The first element in checkpoint list is not removed as it represents the
@@ -1096,7 +1112,7 @@ inline void Descriptor::commit() {
     // reading visibly, null out my invis read list
     cleanupVisReads();
     invisibleReads.reset();
-    cleanupCheckpoints();
+    removeCheckpoints();
   }
 
   // commit memory changes and reset memory logging
