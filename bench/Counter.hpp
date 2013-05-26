@@ -119,19 +119,19 @@ namespace bench
 		}
         }
 
-	void multi_reset_advance(int num_loops,void* t,vector<double> obj_no,int th,double wr_per){
+	void multi_reset_advance(unsigned int num_loops,void* t,vector<double> obj_no,int th,double wr_per){
 		/*
 		 * Must know objects before beginning tx like in PNF
 		 */
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
-		unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
+		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
 		int obj_indx=0;
+		BEGIN_TRANSACTION_M(t,obj_no,th);
 		for(unsigned int i=0;i<tmp_size;i++){
 			m_w_counter[(unsigned int)(obj_no[i])]=stm::wr_ptr<Counter> (m_v_counter[(unsigned int)(obj_no[i])]);
 		}
-		BEGIN_TRANSACTION_M(t,obj_no,th);
-		while(loop_itr<=(unsigned int)num_loops){
+		while(loop_itr<=num_loops){
 		//Traverse through counters specified by obj_no. In each iteration set one of them to 0
 			if((loop_itr%100)/100.0 < wr_per){
 			//write operation
@@ -149,19 +149,19 @@ namespace bench
 		END_TRANSACTION;
 	}
 
-        void multi_reset(int num_loops,void* t,vector<double> obj_no,int th,double wr_per){
+        void multi_reset(unsigned int num_loops,void* t,vector<double> obj_no,int th,double wr_per){
 			//obj_no specifies which objects to set values
 			//wr_per is "write" percentage. "1-wr_per" will be the "read" percentage
 			unsigned int tmp_size=obj_no.size();
 			unsigned int loop_itr=1;		//Holds loop iteration number
 			int obj_indx=0;
-			unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
+			unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
 			BEGIN_TRANSACTION_M(t,obj_no,th);
 			/*
 			 * In case of CHECKPOINTING, the whole transactional length is divided over
 			 * number of objects, so there is a time interval between each object access
 			 */
-			while(loop_itr<=(unsigned int)num_loops){
+			while(loop_itr<=num_loops){
 			//Traverse through counters specified by obj_no. In each iteration set one of them to 0
 				m_w_counter[(unsigned int)(obj_no[obj_indx])]=stm::wr_ptr<Counter> (m_v_counter[(unsigned int)(obj_no[obj_indx])]);
 				if((loop_itr%100)/100.0 < wr_per){
@@ -180,19 +180,19 @@ namespace bench
 			END_TRANSACTION;
         }
         
-        void lcm_multi_reset(int num_loops,double psy,unsigned long exec,void* t,vector<double> obj_no,int th,double wr_per){
+        void lcm_multi_reset(unsigned int num_loops,double psy,unsigned long exec,void* t,vector<double> obj_no,int th,double wr_per){
 		//obj_no specifies which objects to set values
 		//wr_per is "write" percentage. "1-wr_per" will be the "read" percentage
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
 		int obj_indx=0;
-		unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
+		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
 		BEGIN_TRANSACTION_LCM(psy,exec,t,obj_no,th);
 		/*
 		 * In case of CHECKPOINTING, the whole transactional length is divided over
 		 * number of objects, so there is a time interval between each object access
 		 */
-		while(loop_itr<=(unsigned int)num_loops){
+		while(loop_itr<=num_loops){
 		//Traverse through counters specified by obj_no. In each iteration set one of them to 0
 			m_w_counter[(unsigned int)(obj_no[obj_indx])]=stm::wr_ptr<Counter> (m_v_counter[(unsigned int)(obj_no[obj_indx])]);
 			if((loop_itr%100)/100.0 < wr_per){
@@ -211,7 +211,7 @@ namespace bench
 		END_TRANSACTION;
         }
 
-        void multi_reset_lock(int num_loops,unsigned long amount,vector<double> obj_no,double wr_per){
+        void multi_reset_lock(unsigned int num_loops,unsigned long amount,vector<double> obj_no,double wr_per){
         	/*
         	 * For locking implementation. obj_no specifies which objects to set values.
         	 * wr_per is "write" percentage. 1-wr_per is read percentage
@@ -220,7 +220,7 @@ namespace bench
 			unsigned int loop_itr=1;		//Holds loop iteration number
 			unsigned int obj_indx=0;
 			unsigned long read_val;
-			unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;
+			unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;
 			while(loop_itr<num_loops){
 			//Traverse through "free_value"s specified by obj_no. In each iteration set one of them to amount
 				if((loop_itr%100)/100.0 < wr_per){
@@ -231,7 +231,7 @@ namespace bench
 				//read operation
 					read_val=m_free_value_ptr[(int)(obj_no[obj_indx])];
 				}
-				if(loop_itr%itr_per_obj==0 && (unsigned)(num_loops-loop_itr)>itr_per_obj){
+				if(loop_itr%itr_per_obj==0 && (num_loops-loop_itr)>itr_per_obj){
 					obj_indx++;
 				}
 				loop_itr++;
@@ -239,21 +239,21 @@ namespace bench
 		}
 
 	
-	vector<unsigned long long> multi_reset_lock_free(int num_loops,unsigned long amount,vector<double> obj_no,double wr_per){
+	vector<unsigned long long> multi_reset_lock_free(unsigned int num_loops,unsigned long amount,vector<double> obj_no,double wr_per){
 		/*
 		 * For lock-free implementation. obj_no specifies which objects to set values. wr_per is "write"
 		 * percentage. 1-wr_per is read percentage. Return vector contains number of success access to
 		 * object, number of failure access to object, and time for failure access.
 		 */
-		int tmp_size=obj_no.size();
-		int loop_itr=1;		//Holds loop iteration number
+		unsigned int tmp_size=obj_no.size();
+		unsigned int loop_itr=1;		//Holds loop iteration number
 		int obj_indx=0;
 		unsigned long tmp_res;
 		vector<unsigned long long> fin_res, med_res;	//final and intermediate result vectors
 		fin_res.push_back(0);	//initial number of success access to object
 		fin_res.push_back(0);	//initial number of failed access to object
 		fin_res.push_back(0);	//initial time for failed access to object
-		unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;
+		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;
 		while(loop_itr<num_loops){
 			//Traverse through "free_value"s specified by obj_no. In each iteration set one of them to amount
 			if((loop_itr%100)/100.0 < wr_per){
@@ -275,14 +275,14 @@ namespace bench
 		return fin_res;
 	}
 
-	void multi_reset_lock_free(int num_loops,unsigned long amount,vector<double> obj_no){
+	void multi_reset_lock_free(unsigned int num_loops,unsigned long amount,vector<double> obj_no){
 	//For lock-free implementation
 	//so it can be used to determine number of retrial loops
 	//obj_no specifies which objects to set values
-		int tmp_size=obj_no.size();
-		int loop_itr=1;		//Holds loop iteration number
+		unsigned int tmp_size=obj_no.size();
+		unsigned int loop_itr=1;		//Holds loop iteration number
 		int obj_indx=0;
-		unsigned int itr_per_obj=(unsigned long)num_loops<tmp_size?1:num_loops/tmp_size;
+		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;
 		while(loop_itr<num_loops){
 		//Traverse through "free_value"s specified by obj_no. In each iteration set one of them to amount
 			fas(&(m_free_value_ptr[(int)(obj_no[obj_indx])]),amount);
