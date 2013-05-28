@@ -888,8 +888,7 @@ inline void Descriptor::removeCheckpoints(){
 	/*
 	 * Remove all checkpoints including the first one. Used when transaction commits
 	 */
-	setjmp_bufLog::iterator e=setjmp_buf.end();
-	for(setjmp_bufLog::iterator i=setjmp_buf.begin();i<e;i++){
+	for(setjmp_bufLog::iterator i=setjmp_buf.end()-1,e=setjmp_buf.begin();i>=e;--i){
 		setjmp_buf.remove(i);
 	}
 	setjmp_buf.reset();

@@ -477,8 +477,29 @@ stm::PNF::shouldAbort(ContentionManager* enemy)
 {
 //	PNF* t=static_cast<PNF*>(enemy);
 	//If current task is in m_set, abort other
-	if(m_set==true){
+	bool other_mset=((PNF*)enemy)->m_set;
+	if(m_set==true && !other_mset){
 		return AbortOther;
+	}
+	else if(!m_set && other_mset){
+		return AbortSelf;
+	}
+	else if(m_set && other_mset){
+		/*
+		 * Due to timing issues, this case can arise by the following scenario:
+		 * When a Tx commits, it erases its objects first, then it changes state of first Tx in n_set to
+		 * "checking". Then, it changes its state to "released" and its m_set to "false". Between changing
+		 * the state of first n_set Tx to "checking" and changing its own state to "released", the first "n_set"
+		 * Tx can become executing because previous objects have been removed from m_objs set. In this case,
+		 * two conflicting executing Tx exist. So, the first Tx must finish first. So, we resolve conflicts
+		 * based on FIFO
+		 */
+		if(compTimeSpec(&stamp,&(((PNF*)enemy)->stamp))){
+			return AbortOther;
+		}
+		else{
+			return AbortSelf;
+		}
 	}
 	else{
 		return AbortSelf;
