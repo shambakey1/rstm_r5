@@ -126,7 +126,7 @@ namespace bench
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
 		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
-		int obj_indx=0;
+		unsigned int obj_indx=0;
 		BEGIN_TRANSACTION_M(t,obj_no,th);
 		for(unsigned int i=0;i<tmp_size;i++){
 			m_w_counter[(unsigned int)(obj_no[i])]=stm::wr_ptr<Counter> (m_v_counter[(unsigned int)(obj_no[i])]);
@@ -143,6 +143,7 @@ namespace bench
 			}
 			if(loop_itr%itr_per_obj==0 && num_loops-loop_itr>itr_per_obj){
 				obj_indx++;
+				obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 			}
 			loop_itr++;
 		}
@@ -154,7 +155,7 @@ namespace bench
 			//wr_per is "write" percentage. "1-wr_per" will be the "read" percentage
 			unsigned int tmp_size=obj_no.size();
 			unsigned int loop_itr=1;		//Holds loop iteration number
-			int obj_indx=0;
+			unsigned int obj_indx=0;
 			unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
 			BEGIN_TRANSACTION_M(t,obj_no,th);
 			/*
@@ -174,6 +175,7 @@ namespace bench
 				}
 				if(loop_itr%itr_per_obj==0 && num_loops-loop_itr>itr_per_obj){
 					obj_indx++;
+					obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 				}
 				loop_itr++;
 			}
@@ -185,7 +187,7 @@ namespace bench
 		//wr_per is "write" percentage. "1-wr_per" will be the "read" percentage
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
-		int obj_indx=0;
+		unsigned int obj_indx=0;
 		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;	//No of iterations per each object in case of CHECKPOINTING
 		BEGIN_TRANSACTION_LCM(psy,exec,t,obj_no,th);
 		/*
@@ -205,6 +207,7 @@ namespace bench
 			}
 			if(loop_itr%itr_per_obj==0 && num_loops-loop_itr>itr_per_obj){
 				obj_indx++;
+				obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 			}
 			loop_itr++;
 		}
@@ -233,6 +236,7 @@ namespace bench
 				}
 				if(loop_itr%itr_per_obj==0 && (num_loops-loop_itr)>itr_per_obj){
 					obj_indx++;
+					obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 				}
 				loop_itr++;
 			}
@@ -247,7 +251,7 @@ namespace bench
 		 */
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
-		int obj_indx=0;
+		unsigned int obj_indx=0;
 		unsigned long tmp_res;
 		vector<unsigned long long> fin_res, med_res;	//final and intermediate result vectors
 		fin_res.push_back(0);	//initial number of success access to object
@@ -270,6 +274,7 @@ namespace bench
 				obj_indx++;
 			}
 			loop_itr++;
+			obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 		}
 		fin_res[0]=num_loops;
 		return fin_res;
@@ -281,13 +286,14 @@ namespace bench
 	//obj_no specifies which objects to set values
 		unsigned int tmp_size=obj_no.size();
 		unsigned int loop_itr=1;		//Holds loop iteration number
-		int obj_indx=0;
+		unsigned int obj_indx=0;
 		unsigned int itr_per_obj=num_loops<tmp_size?1:num_loops/tmp_size;
 		while(loop_itr<num_loops){
 		//Traverse through "free_value"s specified by obj_no. In each iteration set one of them to amount
 			fas(&(m_free_value_ptr[(int)(obj_no[obj_indx])]),amount);
 			if(loop_itr%itr_per_obj==0 && num_loops-loop_itr>itr_per_obj){
 				obj_indx++;
+				obj_indx=obj_indx>tmp_size?tmp_size:obj_indx;
 			}
 			loop_itr++;
 		}

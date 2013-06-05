@@ -120,20 +120,6 @@ vector< unsigned long long > rstm::thr_printStatistics(){
 	vec.push_back(currentDescriptor->getCommits());
 	vec.push_back(currentDescriptor->getAborts());
 	vec.push_back(currentDescriptor->cm.getCM()->total_abort_duration);
-/******************************* Debug 10 start ********************************/
-/*
-	int vec_siz=currentDescriptor->cm.getCM()->tra_int.size();
-	vector<timespec> tra_start=currentDescriptor->cm.getCM()->tra_start;
-	vector<timespec> tra_abr=currentDescriptor->cm.getCM()->tra_abr;
-	vector<unsigned long long> tra_int=currentDescriptor->cm.getCM()->tra_int;
-	cout<<"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
-	cout<<"st_sec\tst_nsec\tabr_sec\tabr_nsec\tDiff";
-	for(int i=0;i<vec_siz;i++){
-		cout<<tra_start[i].tv_sec<<"\t"<<tra_start[i].tv_nsec<<"\t"<<tra_abr[i].tv_sec<<"\t"<<tra_abr[i].tv_nsec<<"\t"<<tra_int[i]<<endl;
-	}
-	cout<<"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
-*/
-/******************************* Debug 10 end ********************************/
 	return vec;
 }
 
@@ -165,6 +151,7 @@ void rstm::thr_shutdown_nodeb(unsigned long i)
   // free memory from being logically unreclaimable.
   mtx = 0;
 }
+
 /*************************** SH-END ******************************************/
 
 Object* Descriptor::openReadOnly(SharedHandle* const header) {

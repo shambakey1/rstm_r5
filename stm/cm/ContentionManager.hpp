@@ -43,7 +43,8 @@
 #include <chronos/chronos_utils.h>
 #include <iostream>
 #include <vector>
-//#include <stm_chronos.hpp>
+#include <time.h>
+#include <rstm_hlp.hpp>
 #include <pthread.h>
 #include <string>
 #include <sstream>
@@ -54,6 +55,21 @@ using namespace std;
 namespace stm
 {
   enum ConflictResolutions { AbortSelf, AbortOther, Wait };
+  enum tx_state {released,retrying,executing};	//Different states for transaction
+  extern unsigned long long *new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
+  extern unsigned int new_tx_checking;	//If 1, then pnf_main should check Txs in n_set
+  extern unsigned long long *new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
+  extern unsigned long long m_set_bits;	//Holds bit representation of all objects held in m_set in PNF
+  										//Due to current implementation, m_set_bits cannot exceed 64 objects
+  extern pthread_t pnf_main_th;				//pnf_main service thread
+  extern pthread_attr_t pnf_th_attr;			//Attributes for pnf_main service thread
+  extern struct sched_param pnf_main_param;	//scheduling parameters for pnf_main service
+  extern unsigned long pnf_main_th_init;	//If 1, then pnf_main_th has been created
+
+  extern bool compTimeSpec(struct timespec* f_ts,struct timespec* s_ts);	//"true" if f_ts timespec is smaller than s_ts. "false" otherwise
+  extern int nSetPos(void* cm_ptr);	//Returns position of cm_ptr within n_set
+  extern void addTxNset(void* cm_th);	//Add cm_th to n_set according to its priority
+  extern void* pnf_main(void* arg);	//Main (centralized) service of PNF. It continues execution until all tasks finish. It is invoked by Txs to execute some tasks
 
   class ContentionManager
   {
@@ -90,8 +106,17 @@ namespace stm
         unsigned long task_locked;
         int eta;            //Defines maximum number of times each transaction can be aborted
                             //Used in FBLT
-	bool new_tx;		//if true, it is first time to begin transaction. Otherwise, tx has already begun and it is just
-				//an abort and retry
+	bool new_tx;	//if true, it is first time to begin transaction. Otherwise, tx has already begun and it is just
+			//an abort and retry
+	unsigned long long curr_objs_bits;	//Indecies of accessed objects by current Tx. If bit at position X=1, then
+						//current Tx accesses object number X. It should be identified at Tx_begin.
+						//As curr_objs is represented with unsigned long long, than maximum
+						//number of accessed objects cannot exceed 64
+	bool go_on;	//If true, pnf_main tells current Tx to complete execution. It is used to
+			//synchronize execution between pnf_main and current Tx
+	tx_state cur_state;			//Holds state of current transaction
+	struct sched_param orig_param;	//records original sched_param for current thread when a Tx starts
+	bool m_set;				//if "true", tx is an executing tx. Otherwise, tx is a retrying one.
         /********************* Debug 1 end ******************/
         /******************* Debug 6 start *****************/	
         vector<string> getRec(){
@@ -153,6 +178,7 @@ namespace stm
 	tra_abort.tv_sec=0;
 	tra_abort.tv_nsec=0;
 	new_tx=true;
+	go_on=false;
 	/******************************* SH-END **********************************/
       }
       int getPriority() { return priority; }

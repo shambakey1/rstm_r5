@@ -865,6 +865,7 @@ inline void init(std::string a, std::string b, bool c,void* t_args) {
 inline void shutdown_nodeb(unsigned long i)
 // This version of shutdown does not print any thing
 { rstm::thr_shutdown_nodeb(i); }
+
 /*************************** SH-END *****************************************/
 
 inline void shutdown(unsigned long i) { rstm::thr_shutdown(i); }

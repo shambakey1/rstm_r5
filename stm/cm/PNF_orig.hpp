@@ -225,13 +225,12 @@ enum tx_state {released,retrying,checking,executing};	//Different states for tra
                     sched_setparam(0,&param);	//Increase priority until checking m
                     /********************* Debug 4 start *****************/
 /*
-                rec_in.str("");
-		rec=vector<string> ();
-                clock_gettime(CLOCK_REALTIME, &rec_time);
-                sched_getparam(0, &param);
-                rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "released" << endl;
-                rec.push_back(rec_in.str());
-                rec_in.str("");
+                    rec_in.str("");
+                    clock_gettime(CLOCK_REALTIME, &rec_time);
+                    sched_getparam(0, &param);
+                    rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "released" << endl;
+                    rec.push_back(rec_in.str());
+                    rec_in.str("");
 */
 		    /******************* Debug 4 end ********************************/
                     //pthread_mutex_lock(&m_set_mutx);
@@ -250,30 +249,33 @@ enum tx_state {released,retrying,checking,executing};	//Different states for tra
 		else if(cur_state==checking){
 			//Tx is in n_set. But an executing tx finished. So, Tx is checking m_set again
 			//pthread_setschedprio(*th, PNF_M_PRIO);	//Increase priority until checking m
-                        param.sched_priority=PNF_M_PRIO;
-                        sched_setparam(0,&param);
+			if(param.sched_priority!=PNF_M_PRIO){
+				//increase priority of current thread before locking
+				param.sched_priority=PNF_M_PRIO;
+				sched_setparam(0,&param);
+			}
                         /********************* Debug 4 start *****************/
 /*
-                clock_gettime(CLOCK_REALTIME, &rec_time);
-                sched_getparam(0, &param);
-                rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "checking" << endl;
-                rec.push_back(rec_in.str());
-                rec_in.str("");
+                        clock_gettime(CLOCK_REALTIME, &rec_time);
+                        sched_getparam(0, &param);
+                        rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "checking" << endl;
+                        rec.push_back(rec_in.str());
+                        rec_in.str("");
 */
-/******************* Debug 4 end ********************************/
+                        /******************* Debug 4 end ********************************/
 
                         //pthread_mutex_lock(&m_set_mutx);
-                        mu_lock();
+            mu_lock();
 			unsigned int next_tx=nSetPos((void*)this)+1;		//Identify what is next Tx. Should be checked before
 								//further use. Otherwise, it might exceed n_set size
 								//This step should be done before "checkMset". Otherwise, 
 								//Tx might be removed from n_set before knowing its previous position
 			bool check_mset=checkMset(next_tx-1);	//Store checking result
-                        if(check_mset){
-                            //current transaction is not in n_set any more
-                            //next_tx should be reduced by 1
-                            next_tx--;
-                        }
+			if(check_mset){
+				//current transaction is not in n_set any more
+				//next_tx should be reduced by 1
+				next_tx--;
+			}
 			if(next_tx<n_set.size()){		//Haven't finished n_set yet
 			//Prepare the next Tx in n_set for checking
 				((PNF*)(n_set[next_tx]))->cur_state=checking;
@@ -282,30 +284,30 @@ enum tx_state {released,retrying,checking,executing};	//Different states for tra
                                 sched_setparam(((PNF*)(n_set[next_tx]))->th, &param_tmp);
 			}
                         //pthread_mutex_unlock(&m_set_mutx);
-                        mu_unlock();
+            mu_unlock();
 			if(!check_mset){			//Tx still conflicts with m_set
 				//Keep Tx as it is in n_set
 				//pthread_setschedprio(*th, PNF_N_PRIO);
-                            param.sched_priority=PNF_N_PRIO;
-                            sched_setparam(0,&param);
+				param.sched_priority=PNF_N_PRIO;
+				sched_setparam(0,&param);
 			}
 		}
 		else{
 			//DO NOTHING. Tx is either executing or retrying
                     /********************* Debug 4 start *****************/
 /*
-                clock_gettime(CLOCK_REALTIME, &rec_time);
-                sched_getparam(0, &param);
-		if(cur_state==executing){
-	                rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "executing" << endl;
-		}
-		else{
-        	        rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "retrying" << endl;
-		}
-                rec.push_back(rec_in.str());
-                rec_in.str("");
+                    clock_gettime(CLOCK_REALTIME, &rec_time);
+                    sched_getparam(0, &param);
+                    if(cur_state==executing){
+                            rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "executing" << endl;
+                    }
+                    else{
+                            rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "retrying" << endl;
+                    }
+                    rec.push_back(rec_in.str());
+                    rec_in.str("");
 */
-/******************* Debug 4 end ********************************/
+                    /******************* Debug 4 end ********************************/
 
 		}
 		/********************************* Debug 5 start ********************************/
@@ -321,7 +323,7 @@ enum tx_state {released,retrying,checking,executing};	//Different states for tra
 */
                 /******************** Debug 3 end **********************/
 	    }catch(exception e){
-		cout << "onBeginTransaction exception: " << e.what() << endl;
+	    	cout << "onBeginTransaction exception: " << e.what() << endl;
 	    }
 	}
 
@@ -392,7 +394,12 @@ enum tx_state {released,retrying,checking,executing};	//Different states for tra
                         sched_getparam(0, &param);
                         rec_in << (rec_time.tv_sec) << "\t" << (rec_time.tv_nsec) << "\t" << th << "\t" << (param.sched_priority) << "\t" << cur_state << "\t" << m_set << "\t" << "endTxCommitted" << endl;
                         rec.push_back(rec_in.str());
-                        rec_in.str("");                         
+                        rec_in.str(""); 
+                        rec_in<<"abort\t"<<total_abort_duration<<endl;
+                        rec.push_back(rec_in.str());
+                        rec_in.str("");
+			//rec_final=rec;
+			//rec=vector<string> ();
 */
                         /******************** Debug 3 end **********************/
                         //pthread_mutex_unlock(&m_set_mutx);
@@ -473,8 +480,29 @@ stm::PNF::shouldAbort(ContentionManager* enemy)
 {
 //	PNF* t=static_cast<PNF*>(enemy);
 	//If current task is in m_set, abort other
-	if(m_set==true){
+	bool other_mset=((PNF*)enemy)->m_set;
+	if(m_set==true && !other_mset){
 		return AbortOther;
+	}
+	else if(!m_set && other_mset){
+		return AbortSelf;
+	}
+	else if(m_set && other_mset){
+		/*
+		 * Due to timing issues, this case can arise by the following scenario:
+		 * When a Tx commits, it erases its objects first, then it changes state of first Tx in n_set to
+		 * "checking". Then, it changes its state to "released" and its m_set to "false". Between changing
+		 * the state of first n_set Tx to "checking" and changing its own state to "released", the first "n_set"
+		 * Tx can become executing because previous objects have been removed from m_objs set. In this case,
+		 * two conflicting executing Tx exist. So, the first Tx must finish first. So, we resolve conflicts
+		 * based on FIFO
+		 */
+		if(compTimeSpec(&stamp,&(((PNF*)enemy)->stamp))){
+			return AbortOther;
+		}
+		else{
+			return AbortSelf;
+		}
 	}
 	else{
 		return AbortSelf;

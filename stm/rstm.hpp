@@ -68,6 +68,7 @@
 #include "cm/PNF.hpp"
 #include "cm/FBLT.hpp"
 #include <vector>
+#include <pthread.h>
 
 using namespace stm;
 using namespace std;
@@ -1490,6 +1491,7 @@ void thr_shutdown_nodeb(unsigned long i);//to not print any data when shutting d
 vector<unsigned long long> thr_printStatistics();//To only print statistics about the thread when it finishes
 vector<string> thr_printLog();  //To print log information from CM
 void thr_newInst();       //Alerts start of new instance
+
 /****************************** SH-END *********************************************/
 
 /**
