@@ -56,6 +56,7 @@ namespace stm
 {
   enum ConflictResolutions { AbortSelf, AbortOther, Wait };
   enum tx_state {released,retrying,executing};	//Different states for transaction
+  extern unsigned long long new_tx_null;	//Initializer value for new_tx_released and new_tx_committed
   extern unsigned long long *new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
   extern unsigned int new_tx_checking;	//If 1, then pnf_main should check Txs in n_set
   extern unsigned long long *new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
