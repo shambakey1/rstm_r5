@@ -557,6 +557,16 @@ static inline unsigned long fai(volatile unsigned long* ptr)
     return found;
 }
 
+static inline unsigned long fad(volatile unsigned long* ptr)
+{
+    unsigned long found = *ptr;
+    unsigned long expected;
+    do {
+        expected = found;
+    } while (expected && (found = cas(ptr, expected, expected - 1)) != expected);
+    return found;
+}
+
 static inline unsigned long faa(volatile unsigned long* ptr, int amnt)
 {
   unsigned long found = *ptr;

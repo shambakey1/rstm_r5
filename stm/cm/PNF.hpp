@@ -45,14 +45,13 @@ namespace stm
 	m_set=false;
 	cur_state=released;
     	mu_lock();	//Necessary so that pnf_main thread is created only once
-    	if(!pnf_main_th_init){
+    	if(!fai(&cm_stop)){
     		//pnf_main service has not been created yet. Make one
     		pnf_main_param.sched_priority = CM_MAIN_SERVICE;
     		pthread_attr_setscope(&pnf_th_attr, PTHREAD_SCOPE_SYSTEM);
 			pthread_attr_setschedpolicy(&pnf_th_attr, SCHED_FIFO);
 			pthread_attr_setschedparam(&pnf_th_attr, &pnf_main_param);
     		pthread_create(&pnf_main_th,&pnf_th_attr,&pnf_main,NULL);
-    		pnf_main_th_init=1;
     	}
     	mu_unlock();
     }
@@ -88,7 +87,7 @@ namespace stm
 			sched_getparam(0,&orig_param);	//records original sched_param for current thread
 			curr_objs_bits=0;	//Reset to set bits corresponding to objects of current Tx
 			setObjBits();
-			while(!casX(new_tx_released,(unsigned long long*)NULL,(unsigned long long*)this));	//Tx newely released. Try to set address of current CM into new_tx_released
+			while(!casX(new_tx_released,&new_tx_null,(unsigned long long*)this));	//Tx newely released. Try to set address of current CM into new_tx_released
 			while(!go_on){
 				//Loop until pnf_main tell current Tx to continue
 			}
@@ -101,7 +100,7 @@ namespace stm
 
 	virtual void onTransactionCommitted() {
 		try{
-			while(!casX(new_tx_committed,(unsigned long long*)NULL,(unsigned long long*)this));	//Tx commits. Try to set address of current CM into new_tx_committed
+			while(!casX(new_tx_committed,&new_tx_null,(unsigned long long*)this));	//Tx commits. Try to set address of current CM into new_tx_committed
 			while(!go_on){
 				//Loop until pnf_main tell current Tx to continue
 			}

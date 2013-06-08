@@ -64,7 +64,7 @@
 #include "FBLT.hpp"
 
 stm::ContentionManager* no_cm=NULL;	//Used to return NULL pointer if CM does not exist. This replaces the default CM (Polka)
-unsigned long long new_tx_null=0;	//Initilizer value for new_tx_released and new_tx_committed
+unsigned long long stm::new_tx_null=0;	//Initilizer value for new_tx_released and new_tx_committed
 unsigned long long* stm::new_tx_released=&new_tx_null;	//Holds address of a released transaction to be used in pnf_helper
 unsigned int stm::new_tx_checking=0;	//If 1, then pnf_main should check Txs in n_set
 unsigned long long* stm::new_tx_committed=&new_tx_null;	//Holds address of a committed transaction to be used in pnf_helper
@@ -286,7 +286,6 @@ void* stm::pnf_main(void* arg){
 			new_tx_committed=&new_tx_null;	//reset to be used by another Tx
 		}
 	}
-	cm_stop=false;	//reset pnf_stop to be used next time
 	pnf_main_th_init=0;	//reset to be used next time
 	return NULL;
 }

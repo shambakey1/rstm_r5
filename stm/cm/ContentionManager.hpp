@@ -77,50 +77,42 @@ namespace stm
     protected:
       int priority;
     public:
-      /********************************** SH-START *******************************/
-      struct timespec time_param;			//input parameter for ECM which should be cast to deadline
-                                        		//In case of RCM, it holds the period
-	unsigned long length;				//specific for LCM
-	double psy;					//specific for LCM
-	struct timespec stamp, tra_abort;		//stamp records the beginning of the transaction, while tra_abort records when the transaction is aborted
-	unsigned long long total_abort_duration;	//Holds the total abort time of all instances of the thread during the whole run time of experimennt
-	vector<double> acc_obj;                         //list of accessed objects by current tx
-        int th;				//ptr to current thread
-        /************************ Debug 1 start ****************************/
-	//vector<timespec> tra_start, tra_abr;	//Record transaction start, transaction abort.
-	//vector<unsigned long long> tra_int;	//Records difference between transaction start and transaction abort so we can calculate total time of abortion for transactions in each thread
-	/************************ Debug 1 end ****************************/
-        /********************* Debug 1 start ******************/
-        vector<string> rec;	//Holds intermediate records for logging
-	//vector<string> rec_final;	//Holds final logging for current transaction
-        stringstream rec_in;
-        struct timespec rec_time;
-        struct sched_param param;
-        struct sched_param param_tmp;
-        int policy;
-        int task_run_prio;
-        int task_end_prio;
-        int task_util;
-        struct timespec* task_deadline;
-        struct timespec* task_period;
-        unsigned long task_unlocked;
-        unsigned long task_locked;
-        int eta;            //Defines maximum number of times each transaction can be aborted
-                            //Used in FBLT
-	bool new_tx;	//if true, it is first time to begin transaction. Otherwise, tx has already begun and it is just
-			//an abort and retry
-	unsigned long long curr_objs_bits;	//Indecies of accessed objects by current Tx. If bit at position X=1, then
-						//current Tx accesses object number X. It should be identified at Tx_begin.
-						//As curr_objs is represented with unsigned long long, than maximum
-						//number of accessed objects cannot exceed 64
-	bool go_on;	//If true, pnf_main tells current Tx to complete execution. It is used to
-			//synchronize execution between pnf_main and current Tx
-	tx_state cur_state;			//Holds state of current transaction
-	struct sched_param orig_param;	//records original sched_param for current thread when a Tx starts
-	bool m_set;				//if "true", tx is an executing tx. Otherwise, tx is a retrying one.
-        /********************* Debug 1 end ******************/
-        /******************* Debug 6 start *****************/	
-        vector<string> getRec(){
+      	struct timespec time_param;			//input parameter for ECM which should be cast to deadline
+                                       		//In case of RCM, it holds the period
+		unsigned long length;				//specific for LCM
+		double psy;							//specific for LCM
+		struct timespec stamp, tra_abort;		//stamp records the beginning of the transaction, while tra_abort records when the transaction is aborted
+		unsigned long long total_abort_duration;	//Holds the total abort time of all instances of the thread during the whole run time of experimennt
+		vector<double> acc_obj;                         //list of accessed objects by current tx
+		int th;				//ptr to current thread
+		vector<string> rec;	//Holds intermediate records for logging
+		stringstream rec_in;
+		struct timespec rec_time;
+		struct sched_param param;
+		struct sched_param param_tmp;
+		int policy;
+		int task_run_prio;
+		int task_end_prio;
+		int task_util;
+		struct timespec* task_deadline;
+		struct timespec* task_period;
+		unsigned long task_unlocked;
+		unsigned long task_locked;
+		int eta;            //Defines maximum number of times each transaction can be aborted
+							//Used in FBLT
+		bool new_tx;	//if true, it is first time to begin transaction. Otherwise, tx has already begun and it is just
+						//an abort and retry
+		unsigned long long curr_objs_bits;	//Indecies of accessed objects by current Tx. If bit at position X=1, then
+											//current Tx accesses object number X. It should be identified at Tx_begin.
+											//As curr_objs is represented with unsigned long long, than maximum
+											//number of accessed objects cannot exceed 64
+		bool go_on;	//If true, pnf_main tells current Tx to complete execution. It is used to
+					//synchronize execution between pnf_main and current Tx
+		tx_state cur_state;			//Holds state of current transaction
+		struct sched_param orig_param;	//records original sched_param for current thread when a Tx starts
+		bool m_set;				//if "true", tx is an executing tx. Otherwise, tx is a retrying one.
+
+		vector<string> getRec(){
             return rec;
         }
         
@@ -129,10 +121,10 @@ namespace stm
             //Define things that need to be renewed in the new instance
             rec=vector<string> ();
         }
-          /******************* Debug 6 end *****************/
-      struct timespec* getTimeParam(){
+
+        struct timespec* getTimeParam(){
           return &time_param;
-      }
+        }
 
 	/******************** LCM functions start ********************/
 
@@ -205,10 +197,6 @@ namespace stm
 	  try{
 		clock_gettime(CLOCK_REALTIME, &tra_abort);
 		total_abort_duration+=subtract_ts_mod(&stamp,&tra_abort);
-		/*************************** Debug 6 start ********************************/
-		//tra_abr.push_back(tra_abort);
-		//tra_int.push_back(subtract_ts_mod(&stamp,&tra_abort));
-		/*************************** Debug 6 end ********************************/
 	    }catch(exception e){
 		cout<<"onTransactionAborted exception: "<<e.what()<<endl;
 	    }
