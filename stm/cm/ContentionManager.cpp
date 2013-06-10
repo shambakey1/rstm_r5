@@ -64,12 +64,11 @@
 #include "FBLT.hpp"
 
 stm::ContentionManager* no_cm=NULL;	//Used to return NULL pointer if CM does not exist. This replaces the default CM (Polka)
-unsigned long long stm::new_tx_null=0;	//Initilizer value for new_tx_released and new_tx_committed
-unsigned long long* stm::new_tx_released=&new_tx_null;	//Holds address of a released transaction to be used in pnf_helper
-unsigned int stm::new_tx_checking=0;	//If 1, then pnf_main should check Txs in n_set
-unsigned long long* stm::new_tx_committed=&new_tx_null;	//Holds address of a committed transaction to be used in pnf_helper
+volatile unsigned long long* stm::new_tx_released=NULL;	//Holds address of a released transaction to be used in pnf_helper
+volatile unsigned int stm::new_tx_checking=0;	//If 1, then pnf_main should check Txs in n_set
+volatile unsigned long long* stm::new_tx_committed=NULL;	//Holds address of a committed transaction to be used in pnf_helper
 
-unsigned long long stm::m_set_bits=0;	//Holds bit representation of all objects held in m_set in PNF
+volatile unsigned long long stm::m_set_bits=0;	//Holds bit representation of all objects held in m_set in PNF
 										//Due to current implementation, m_set_bits cannot exceed 64 objects
 pthread_t stm::pnf_main_th;				//pnf_main service thread
 pthread_attr_t stm::pnf_th_attr;		//Attributes for pnf_main service thread
@@ -218,8 +217,8 @@ void* stm::pnf_main(void* arg){
 	 */
 	unsigned int next_tx;	//Tx index in n_set
 
-	while(!cm_stop){
-		if(new_tx_released!=&new_tx_null){
+	while(cm_stop){
+		if(new_tx_released){
 			//A new Tx is released. Check there is no conflict with current executing Txs
 			if(m_set_bits & ((ContentionManager*)new_tx_released)->curr_objs_bits){
 				//AND is not 0. There is a conflict. m_set is already false
@@ -238,7 +237,7 @@ void* stm::pnf_main(void* arg){
 				sched_setparam(((ContentionManager*)new_tx_released)->th, &(((ContentionManager*)new_tx_released)->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
 			}
 			((ContentionManager*)new_tx_released)->go_on=true;	//Tell released Tx to continue execution
-			new_tx_released=&new_tx_null;	//reset to be used by another Tx
+			new_tx_released=NULL;	//reset to be used by another Tx
 		}
 		if(new_tx_checking){
 			//Check Txs in n_set. Checking is done after a Tx commits
@@ -262,7 +261,7 @@ void* stm::pnf_main(void* arg){
 			}
 			new_tx_checking=0;	//reset to be used after another Tx commits
 		}
-		if(new_tx_committed!=&new_tx_null){
+		if(new_tx_committed){
 			//A Tx has committed
 			if(((ContentionManager*)new_tx_committed)->cur_state==retrying){
 				/*
@@ -283,7 +282,7 @@ void* stm::pnf_main(void* arg){
 			((ContentionManager*)new_tx_committed)->cur_state=released;
 			sched_setparam(((ContentionManager*)new_tx_committed)->th, &(((ContentionManager*)new_tx_committed)->orig_param));	//Restore priority of current Tx to its original real-time priority
 			((ContentionManager*)new_tx_committed)->go_on=true;
-			new_tx_committed=&new_tx_null;	//reset to be used by another Tx
+			new_tx_committed=NULL;	//reset to be used by another Tx
 		}
 	}
 	pnf_main_th_init=0;	//reset to be used next time

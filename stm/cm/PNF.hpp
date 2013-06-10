@@ -87,11 +87,14 @@ namespace stm
 			sched_getparam(0,&orig_param);	//records original sched_param for current thread
 			curr_objs_bits=0;	//Reset to set bits corresponding to objects of current Tx
 			setObjBits();
-			while(!casX(new_tx_released,&new_tx_null,(unsigned long long*)this));	//Tx newely released. Try to set address of current CM into new_tx_released
+			//Tx newely released. Try to get the lock of new_tx_released_mutex and set address of current CM into new_tx_released
+			new_tx_released_lock();
+			new_tx_released=(unsigned long long*)this;
 			while(!go_on){
 				//Loop until pnf_main tell current Tx to continue
 			}
 			go_on=false;	//Reset to be used later
+			new_tx_released_unlock();	//Release the lock to be used by another Tx
 		}
 	  }catch(exception e){
 	    	cout << "onBeginTransaction exception: " << e.what() << endl;
@@ -100,11 +103,14 @@ namespace stm
 
 	virtual void onTransactionCommitted() {
 		try{
-			while(!casX(new_tx_committed,&new_tx_null,(unsigned long long*)this));	//Tx commits. Try to set address of current CM into new_tx_committed
+			//Tx commits. Try get the lock of new_tx_committed and set address of current CM into new_tx_committed
+			new_tx_committed_lock();
+			new_tx_committed=(unsigned long long*)this;
 			while(!go_on){
 				//Loop until pnf_main tell current Tx to continue
 			}
 			go_on=false;	//Reset to be used later
+			new_tx_committed_unlock();	//Release the lock to be used by another Tx
 		}catch(exception e){
 			cout << "onTransactionCommitted exception: " << e.what() << endl;
 		}

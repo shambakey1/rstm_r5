@@ -56,11 +56,10 @@ namespace stm
 {
   enum ConflictResolutions { AbortSelf, AbortOther, Wait };
   enum tx_state {released,retrying,executing};	//Different states for transaction
-  extern unsigned long long new_tx_null;	//Initializer value for new_tx_released and new_tx_committed
-  extern unsigned long long *new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
-  extern unsigned int new_tx_checking;	//If 1, then pnf_main should check Txs in n_set
-  extern unsigned long long *new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
-  extern unsigned long long m_set_bits;	//Holds bit representation of all objects held in m_set in PNF
+  extern volatile unsigned long long *new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
+  extern volatile unsigned int new_tx_checking;	//If 1, then pnf_main should check Txs in n_set
+  extern volatile unsigned long long *new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
+  extern volatile unsigned long long m_set_bits;	//Holds bit representation of all objects held in m_set in PNF
   										//Due to current implementation, m_set_bits cannot exceed 64 objects
   extern pthread_t pnf_main_th;				//pnf_main service thread
   extern pthread_attr_t pnf_th_attr;			//Attributes for pnf_main service thread
