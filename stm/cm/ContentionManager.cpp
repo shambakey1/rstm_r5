@@ -64,16 +64,15 @@
 #include "FBLT.hpp"
 
 stm::ContentionManager* no_cm=NULL;	//Used to return NULL pointer if CM does not exist. This replaces the default CM (Polka)
-volatile unsigned long long* stm::new_tx_released=NULL;	//Holds address of a released transaction to be used in pnf_helper
+volatile unsigned long long stm::new_tx_released=0;	//Holds address of a released transaction to be used in pnf_helper
 volatile unsigned int stm::new_tx_checking=0;	//If 1, then pnf_main should check Txs in n_set
-volatile unsigned long long* stm::new_tx_committed=NULL;	//Holds address of a committed transaction to be used in pnf_helper
+volatile unsigned long long stm::new_tx_committed=0;	//Holds address of a committed transaction to be used in pnf_helper
 
 volatile unsigned long long stm::m_set_bits=0;	//Holds bit representation of all objects held in m_set in PNF
 										//Due to current implementation, m_set_bits cannot exceed 64 objects
-pthread_t stm::pnf_main_th;				//pnf_main service thread
+pthread_t stm::pnf_main_th=0;				//pnf_main service thread
 pthread_attr_t stm::pnf_th_attr;		//Attributes for pnf_main service thread
 struct sched_param stm::pnf_main_param;	//scheduling parameters for pnf_main service
-unsigned long stm::pnf_main_th_init=0;	//If 1, then pnf_main_th has been created
 /************************* SH-END **********************************/
 
 // create the appropriate cm based on the input string
@@ -210,6 +209,25 @@ void stm::addTxNset(void* cm_th){
 	n_set.push_back(cm_th);
 }
 
+void stm::pnf_main_start(){
+	/*
+	 * Starts pnf_main service. This function must be called before initiating PNF CM for any task
+	 */
+	cm_stop=1;
+	pnf_main_param.sched_priority = CM_MAIN_SERVICE;
+	pthread_attr_setscope(&pnf_th_attr, PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setschedpolicy(&pnf_th_attr, SCHED_FIFO);
+	pthread_attr_setschedparam(&pnf_th_attr, &pnf_main_param);
+	pthread_create(&pnf_main_th,&pnf_th_attr,&pnf_main,NULL);
+}
+
+void stm::pnf_main_stop(){
+	/*
+	 * Stops pnf_main service
+	 */
+	cm_stop=0;
+}
+
 void* stm::pnf_main(void* arg){
 	/*
 	 * Main (centralized) service of PNF. It continues execution until all tasks finish. It is invoked
@@ -236,8 +254,8 @@ void* stm::pnf_main(void* arg){
 				((ContentionManager*)new_tx_released)->param.sched_priority=PNF_M_PRIO;
 				sched_setparam(((ContentionManager*)new_tx_released)->th, &(((ContentionManager*)new_tx_released)->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
 			}
-			((ContentionManager*)new_tx_released)->go_on=true;	//Tell released Tx to continue execution
-			new_tx_released=NULL;	//reset to be used by another Tx
+			((ContentionManager*)new_tx_released)->go_on=false;	//Tell released Tx to continue execution
+			new_tx_released=0;	//reset to be used by another Tx
 		}
 		if(new_tx_checking){
 			//Check Txs in n_set. Checking is done after a Tx commits
@@ -281,11 +299,11 @@ void* stm::pnf_main(void* arg){
 			((ContentionManager*)new_tx_committed)->m_set=false;
 			((ContentionManager*)new_tx_committed)->cur_state=released;
 			sched_setparam(((ContentionManager*)new_tx_committed)->th, &(((ContentionManager*)new_tx_committed)->orig_param));	//Restore priority of current Tx to its original real-time priority
-			((ContentionManager*)new_tx_committed)->go_on=true;
-			new_tx_committed=NULL;	//reset to be used by another Tx
+			((ContentionManager*)new_tx_committed)->go_on=false;
+			new_tx_committed=0;	//reset to be used by another Tx
 		}
 	}
-	pnf_main_th_init=0;	//reset to be used next time
+	pnf_main_th=0;	//reset to be used next time
 	return NULL;
 }
 /********************* SH-END ********************************/

@@ -56,19 +56,20 @@ namespace stm
 {
   enum ConflictResolutions { AbortSelf, AbortOther, Wait };
   enum tx_state {released,retrying,executing};	//Different states for transaction
-  extern volatile unsigned long long *new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
+  extern volatile unsigned long long new_tx_released;	//Holds address of a released transaction to be used in pnf_helper
   extern volatile unsigned int new_tx_checking;	//If 1, then pnf_main should check Txs in n_set
-  extern volatile unsigned long long *new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
+  extern volatile unsigned long long new_tx_committed;	//Holds address of a committed transaction to be used in pnf_helper
   extern volatile unsigned long long m_set_bits;	//Holds bit representation of all objects held in m_set in PNF
   										//Due to current implementation, m_set_bits cannot exceed 64 objects
   extern pthread_t pnf_main_th;				//pnf_main service thread
   extern pthread_attr_t pnf_th_attr;			//Attributes for pnf_main service thread
   extern struct sched_param pnf_main_param;	//scheduling parameters for pnf_main service
-  extern unsigned long pnf_main_th_init;	//If 1, then pnf_main_th has been created
 
   extern bool compTimeSpec(struct timespec* f_ts,struct timespec* s_ts);	//"true" if f_ts timespec is smaller than s_ts. "false" otherwise
   extern int nSetPos(void* cm_ptr);	//Returns position of cm_ptr within n_set
   extern void addTxNset(void* cm_th);	//Add cm_th to n_set according to its priority
+  extern void pnf_main_start();	//Starts pnf_main service. This function must be called before initiating PNF CM for any task
+  extern void pnf_main_stop();	//Stops pnf_main service
   extern void* pnf_main(void* arg);	//Main (centralized) service of PNF. It continues execution until all tasks finish. It is invoked by Txs to execute some tasks
 
   class ContentionManager
