@@ -34,6 +34,8 @@ namespace stm
     private:
 
         struct timespec now;
+	
+
         ConflictResolutions shouldAbort(ContentionManager* enemy);
 
     public:
@@ -41,6 +43,11 @@ namespace stm
     PNF(){
 		m_set=false;
 		cur_state=released;
+		if(!pnf_main_th){
+			//pnf_main service has not been created yet. Print error message and exit
+			cout<<"pnf_main service has not been created yet."<<endl;
+			exit(0);
+		}
     }
 
     timespec* GetTimestamp(){
@@ -71,35 +78,14 @@ namespace stm
 	  try{
 		clock_gettime(CLOCK_REALTIME, &stamp);
 		if(cur_state==released){
+			go_on=true;
 			sched_getparam(0,&orig_param);	//records original sched_param for current thread
 			curr_objs_bits=0;	//Reset to set bits corresponding to objects of current Tx
 			setObjBits();
-		}
-		//check conflict between current Tx and other Txs
-		cur_m_set_bits=m_set_bits;	//current version of m_set_bits
-		if(cur_m_set_bits & curr_objs_bits){
-			/*
-			 * This is a weak comparison because m_set_bits might have already changed by now. But to enhance
-			 * performance, we use it this way
-			 */
-			//There is a conflict
-			if(cur_state==released){
-				//Change status and priority if not already done so
-				cur_state=retrying;
-				param.sched_priority=PNF_N_PRIO;
-				sched_setscheduler(0, SCHED_FIFO, &param);
-			}
-		}
-		else{
-			/*
-			 * According to current version of m_set_bits, there is no conflict. But we must use lock-free
-			 * operation to be sure
-			 */
-			if(cur_m_set_bits==__sync_val_compare_and_swap(&m_set_bits,cur_m_set_bits,(cur_m_set_bits | curr_objs_bits))){
-				//Current Tx has succefully recorded its objects in all accessed objects
-				param.sched_priority=PNF_M_PRIO;
-				sched_setscheduler(0, SCHED_FIFO, &param);
-				m_set=true;
+			//Tx newely released. Try to set address of current CM into new_tx_released
+			while(__sync_val_compare_and_swap(&new_tx_released,0,(unsigned long long)this));
+			while(go_on){
+				//Loop until pnf_main tell current Tx to continue
 			}
 		}
 	  }catch(exception e){
@@ -109,12 +95,12 @@ namespace stm
 
 	virtual void onTransactionCommitted() {
 		try{
-			m_set=false;
-			mu_lock();
-			cur_m_set_bits &= (~curr_objs_bits);
-			mu_unlock();
-			cur_state=released;
-			//sched_setscheduler(0, SCHED_FIFO, &orig_param);	//Restore priority of current Tx to its original real-time priority
+			//Tx commits. Try to set address of current CM into new_tx_committed
+			go_on=true;
+			while(__sync_val_compare_and_swap(&new_tx_committed,0,(unsigned long long)this));
+			while(go_on){
+				//Loop until pnf_main tell current Tx to continue
+			}
 		}catch(exception e){
 			cout << "onTransactionCommitted exception: " << e.what() << endl;
 		}

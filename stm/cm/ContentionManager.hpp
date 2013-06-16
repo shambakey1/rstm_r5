@@ -102,10 +102,12 @@ namespace stm
 							//Used in FBLT
 		bool new_tx;	//if true, it is first time to begin transaction. Otherwise, tx has already begun and it is just
 						//an abort and retry
-		unsigned long long curr_objs_bits;	//Indecies of accessed objects by current Tx. If bit at position X=1, then
+		unsigned long long curr_objs_bits;	//Indices of accessed objects by current Tx. If bit at position X=1, then
 											//current Tx accesses object number X. It should be identified at Tx_begin.
 											//As curr_objs is represented with unsigned long long, than maximum
 											//number of accessed objects cannot exceed 64
+		unsigned long long cur_m_set_bits;	//current version of m_set_bits. It is used with lock-free conflict checking in some CMs like PNF
+		unsigned long long new_m_set_bits;	//New m_set_bits from the perspective of cur_m_set_bits and current Tx
 		bool go_on;	//If true, pnf_main tells current Tx to complete execution. It is used to
 					//synchronize execution between pnf_main and current Tx
 		tx_state cur_state;			//Holds state of current transaction

@@ -243,7 +243,7 @@ void* stm::pnf_main(void* arg){
 				addTxNset((void*)new_tx_released);	//Put the new Tx in n_set
 				((ContentionManager*)new_tx_released)->cur_state=retrying;	//Identify the new Tx as retrying
 				((ContentionManager*)new_tx_released)->param.sched_priority=PNF_N_PRIO;
-				sched_setparam(((ContentionManager*)new_tx_released)->th, &(((ContentionManager*)new_tx_released)->param));	//Reduce priority to lowest value
+				sched_setscheduler(((ContentionManager*)new_tx_released)->th, SCHED_FIFO, &(((ContentionManager*)new_tx_released)->param));
 			}
 			else{
 				//AND is 0. There is no conflict.
@@ -252,7 +252,7 @@ void* stm::pnf_main(void* arg){
 				//Modify m_set_bits to include the new accessed objects' bits
 				m_set_bits |= (((ContentionManager*)new_tx_released)->curr_objs_bits);
 				((ContentionManager*)new_tx_released)->param.sched_priority=PNF_M_PRIO;
-				sched_setparam(((ContentionManager*)new_tx_released)->th, &(((ContentionManager*)new_tx_released)->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
+				sched_setscheduler(((ContentionManager*)new_tx_released)->th, SCHED_FIFO, &(((ContentionManager*)new_tx_released)->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
 			}
 			((ContentionManager*)new_tx_released)->go_on=false;	//Tell released Tx to continue execution
 			new_tx_released=0;	//reset to be used by another Tx
@@ -274,7 +274,7 @@ void* stm::pnf_main(void* arg){
 					m_set_bits |= (((ContentionManager*)(n_set[next_tx]))->curr_objs_bits);	//Modify m_set_bits to include the new accessed objects' bits
 					n_set.erase(n_set.begin()+next_tx);	//Remove checking Tx from n_set
 					((ContentionManager*)(n_set[next_tx]))->param.sched_priority=PNF_M_PRIO;
-					sched_setparam(((ContentionManager*)(n_set[next_tx]))->th, &(((ContentionManager*)(n_set[next_tx]))->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
+					sched_setscheduler(((ContentionManager*)(n_set[next_tx]))->th, SCHED_FIFO, &(((ContentionManager*)(n_set[next_tx]))->param));	//Increase priority to highest value as Tx is a non-preemptive Tx
 				}
 			}
 			new_tx_checking=0;	//reset to be used after another Tx commits
@@ -298,7 +298,7 @@ void* stm::pnf_main(void* arg){
             //will go on with the last values for these variables
 			((ContentionManager*)new_tx_committed)->m_set=false;
 			((ContentionManager*)new_tx_committed)->cur_state=released;
-			sched_setparam(((ContentionManager*)new_tx_committed)->th, &(((ContentionManager*)new_tx_committed)->orig_param));	//Restore priority of current Tx to its original real-time priority
+//			sched_setscheduler(((ContentionManager*)new_tx_committed)->th, SCHED_FIFO, &(((ContentionManager*)new_tx_committed)->orig_param));	//Restore priority of current Tx to its original real-time priority
 			((ContentionManager*)new_tx_committed)->go_on=false;
 			new_tx_committed=0;	//reset to be used by another Tx
 		}
