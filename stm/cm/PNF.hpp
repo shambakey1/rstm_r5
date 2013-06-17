@@ -95,12 +95,14 @@ namespace stm
 			 * According to current version of m_set_bits, there is no conflict. But we must use lock-free
 			 * operation to be sure
 			 */
-			if(cur_m_set_bits==__sync_val_compare_and_swap(&m_set_bits,cur_m_set_bits,(cur_m_set_bits | curr_objs_bits))){
-				//Current Tx has succefully recorded its objects in all accessed objects
+			mu_lock();
+			if(!(m_set_bits & curr_objs_bits)){
+				m_set_bits |= curr_obj_bits;
 				param.sched_priority=PNF_M_PRIO;
 				sched_setscheduler(0, SCHED_FIFO, &param);
 				m_set=true;
 			}
+			mu_unlock();
 		}
 	  }catch(exception e){
 	    	cout << "onBeginTransaction exception: " << e.what() << endl;
