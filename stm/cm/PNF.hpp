@@ -97,7 +97,7 @@ namespace stm
 			 */
 			mu_lock();
 			if(!(m_set_bits & curr_objs_bits)){
-				m_set_bits |= curr_obj_bits;
+				m_set_bits |= curr_objs_bits;
 				param.sched_priority=PNF_M_PRIO;
 				sched_setscheduler(0, SCHED_FIFO, &param);
 				m_set=true;
